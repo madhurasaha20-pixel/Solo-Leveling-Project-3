@@ -13,9 +13,12 @@ public class SecurityConfiguration {
         http.authorizeHttpRequests(configurer ->
                 configurer
                         .requestMatchers( "/auth/*").permitAll()
+                        .requestMatchers("/h2-console", "/h2-console/**").permitAll()
                         .anyRequest().authenticated()
 
         );
+        http.csrf(csrf -> csrf.disable());
+        http.headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()));
         http.httpBasic(Customizer.withDefaults());
         return http.build();
     }
