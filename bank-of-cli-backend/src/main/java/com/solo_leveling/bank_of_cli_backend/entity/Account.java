@@ -9,7 +9,7 @@ import org.hibernate.annotations.Check;
 import java.math.BigDecimal;
 
 @Entity
-@Table(name = "accounts")
+@Table(name = "account")
 @Getter
 @Setter
 @NoArgsConstructor
