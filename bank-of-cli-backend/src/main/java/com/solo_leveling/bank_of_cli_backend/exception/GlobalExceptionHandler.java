@@ -1,0 +1,52 @@
+package com.solo_leveling.bank_of_cli_backend.exception;
+
+import com.solo_leveling.bank_of_cli_backend.dto.response.ApiError;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    ResponseEntity<ApiError> handleValidation(MethodArgumentNotValidException e) {
+        var fieldError = e.getBindingResult().getFieldErrors().stream().findFirst().orElse(null);
+        String message = fieldError != null && fieldError.getDefaultMessage() != null
+                ? fieldError.getDefaultMessage()
+                : "Invalid request.";
+        String field = fieldError != null ? fieldError.getField() : null;
+        return build(HttpStatus.BAD_REQUEST, "VALIDATION_ERROR", message, field);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    ResponseEntity<ApiError> handleUnreadable(HttpMessageNotReadableException e) {
+        return build(HttpStatus.BAD_REQUEST, "VALIDATION_ERROR", "Request body is missing or malformed.", null);
+    }
+
+    @ExceptionHandler(EmailTakenException.class)
+    ResponseEntity<ApiError> handleEmailTaken(EmailTakenException e) {
+        return build(HttpStatus.CONFLICT, "EMAIL_TAKEN", e.getMessage(), "email");
+    }
+
+    @ExceptionHandler(Exception.class)
+    ResponseEntity<ApiError> handleUnexpected(Exception e) throws Exception {
+        // let Spring Security's own handling (401/403) deal with these
+        if (e instanceof AccessDeniedException || e instanceof AuthenticationException) {
+            throw e;
+        }
+        log.error("Unhandled exception", e);
+        return build(HttpStatus.INTERNAL_SERVER_ERROR, "UNKNOWN", "Something went wrong. Please try again.", null);
+    }
+
+    private ResponseEntity<ApiError> build(HttpStatus status, String code, String message, String field) {
+        return ResponseEntity.status(status).body(new ApiError(status.value(), code, message, field));
+    }
+}

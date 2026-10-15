@@ -1,10 +1,11 @@
 package com.solo_leveling.bank_of_cli_backend.controller;
 
+import com.solo_leveling.bank_of_cli_backend.dto.request.RegisterRequest;
 import com.solo_leveling.bank_of_cli_backend.service.AuthService;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auth")
@@ -15,8 +16,15 @@ public class AuthController {
         this.authService = authService;
     }
 
-    @GetMapping("/hello-world")
-    ResponseEntity<String> getHelloWorld() {
-        return ResponseEntity.ok("Hello World");
+    @PostMapping("/register")
+    ResponseEntity<Void> register(@Valid @RequestBody RegisterRequest request) {
+        authService.register(request);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    // HTTP Basic authentication happens in the security filter chain; reaching here means it succeeded
+    @PostMapping("/login")
+    ResponseEntity<String> login() {
+        return ResponseEntity.ok("Login successful");
     }
 }
