@@ -34,10 +34,12 @@ TypeScript versions live in `core/models/`.
   "id": "ACC-1001",
   "userId": "u1",
   "type": "checking",
+  "nickname": "Rainy day fund",
   "balance": 1325.75,
   "currency": "USD"
 }
 ```
+`nickname` is optional and left out when the owner hasn't set one.
 
 ### Transaction
 | Field | Type | Notes |
@@ -110,6 +112,8 @@ user sees errors instantly.
 | `amount` (withdraw, transfer) | Not more than the balance | Insufficient funds. Available balance is $X. |
 | `toAccountId` | Not empty, not your own account, must exist | (see endpoint) |
 | `description` | Optional, at most 100 characters | Description must be 100 characters or fewer. |
+| `nickname` | Optional, at most 30 characters (blank clears it) | Nickname must be 30 characters or fewer. |
+| `type` (edit account) | `"checking"` or `"savings"` | Account type must be checking or savings. |
 
 ---
 
@@ -182,6 +186,17 @@ Errors: `400 VALIDATION_ERROR`, `401`, `403`, `404`
 Same request and response shape as deposit (`type` is `"withdraw"`).
 
 Errors: `400 VALIDATION_ERROR`, `422 INSUFFICIENT_FUNDS`, `401`, `403`, `404`
+
+### PATCH `/api/accounts/{accountId}` 🔒
+Edits one of **your** accounts. Send only what changes; a blank `nickname` clears it.
+
+Request
+```json
+{ "nickname": "Rainy day fund", "type": "savings" }
+```
+200 OK: the updated **Account**.
+
+Errors: `400 VALIDATION_ERROR` (`field: "nickname"` or `"type"`), `401`, `403 FORBIDDEN`, `404 ACCOUNT_NOT_FOUND`
 
 ### POST `/api/accounts/{accountId}/transfer` 🔒
 Request

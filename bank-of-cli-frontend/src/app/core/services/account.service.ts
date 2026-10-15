@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject, Observable, catchError, tap, throwError } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
-import { Account } from '../models';
+import { Account, UpdateAccountRequest } from '../models';
 import { toApiError } from './api-error.util';
 import { AuthService } from './auth.service';
 
@@ -54,6 +54,23 @@ export class AccountService {
   loadMyAccounts(): Observable<Account[]> {
     return this.http.get<Account[]>(`${this.api}/accounts`).pipe(
       tap(accounts => this.accountsSubject.next(accounts)),
+      catchError(err => throwError(() => toApiError(err)))
+    );
+  }
+
+  /**
+   * PATCH /accounts/{accountId}. Renames the account and/or changes its type.
+   * Errors: VALIDATION_ERROR (field: nickname | type), UNAUTHORIZED, FORBIDDEN, ACCOUNT_NOT_FOUND
+   */
+  updateAccount(accountId: string, changes: UpdateAccountRequest): Observable<Account> {
+    return this.http.patch<Account>(`${this.api}/accounts/${encodeURIComponent(accountId)}`, changes).pipe(
+      tap(account => {
+        // unlike updateCachedAccount, only touch account$ when it is the account that changed
+        if (this.accountSubject.value?.id === account.id) this.accountSubject.next(account);
+        this.accountsSubject.next(
+          this.accountsSubject.value.map(existing => (existing.id === account.id ? account : existing))
+        );
+      }),
       catchError(err => throwError(() => toApiError(err)))
     );
   }

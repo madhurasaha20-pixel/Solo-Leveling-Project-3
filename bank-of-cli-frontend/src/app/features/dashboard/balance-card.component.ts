@@ -10,10 +10,12 @@ import { AlertComponent, ButtonComponent, CardComponent, SkeletonComponent } fro
 /**
  * CardView [Balance]. Presentational only: the dashboard page passes the data in.
  *
- *   <app-balance-card [account]="account()" [updatedAt]="updatedAt()" [error]="error()" (retry)="refresh()" />
+ *   <app-balance-card [account]="account()" [updatedAt]="updatedAt()" [error]="error()" (retry)="refresh()"
+ *                     (edit)="startEdit($event)" />
  *
  * States
- *   account set         -> balance (dollars large, cents raised), hide/show toggle, receipt footer
+ *   account set         -> balance (dollars large, cents raised), hide/show toggle, edit button, receipt footer
+ *                          (the title is the account's nickname when it has one, otherwise its type)
  *   no account + error  -> error alert with a retry button
  *   neither             -> skeleton shaped like the real card
  */
@@ -23,7 +25,7 @@ import { AlertComponent, ButtonComponent, CardComponent, SkeletonComponent } fro
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'block' },
   template: `
-    <bc-card [title]="title()">
+    <bc-card [title]="heading()">
       @if (account()) {
         <bc-button cardAction variant="ghost" size="sm" (click)="visibility.toggle()">        
           {{ hidden() ? 'Show' : 'Hide' }}<span class="sr-only"> balance</span>
@@ -46,7 +48,10 @@ import { AlertComponent, ButtonComponent, CardComponent, SkeletonComponent } fro
           </p>
         }
 
-        <div class="mt-4 flex justify-end">
+        <div class="mt-4 flex justify-end gap-3">
+          <bc-button variant="ghost" size="sm" (click)="edit.emit(acct)">
+            Edit<span class="sr-only"> account</span>
+          </bc-button>
           <bc-button variant="secondary" size="sm" routerLink="/move-money">Manage Money</bc-button>
         </div>
 
@@ -85,10 +90,18 @@ export class BalanceCardComponent {
   /** User-facing message from ApiError.message; only shown when there is no account to display. */
   readonly error = input<string | null>(null);
   readonly retry = output<void>();
+  /** User clicked Edit; the dashboard swaps this card for the edit card. */
+  readonly edit = output<Account>();
 
 /** Privacy toggle, like real banking apps. Shared with the account menu's Hide button. */  
   protected readonly visibility = inject(BalanceVisibilityService);
   protected readonly hidden = this.visibility.hidden;
+  /** "Rainy day fund", or "Checking"/"Savings" from the type; falls back to [title] while loading. */
+  protected readonly heading = computed(() => {
+    const acct = this.account();
+    if (!acct) return this.title();
+    return acct.nickname || acct.type.charAt(0).toUpperCase() + acct.type.slice(1);
+  });
   protected readonly full = computed(() => formatMoney(this.account()?.balance ?? 0));
 
   /** "$1,325.75" -> { whole: "$1,325", cents: ".75" } */

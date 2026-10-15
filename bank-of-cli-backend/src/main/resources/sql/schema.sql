@@ -25,3 +25,14 @@ CREATE TABLE IF NOT EXISTS user_role (
     FOREIGN KEY (role_id) REFERENCES role(id),
     UNIQUE (user_id, role_id)                 -- still prevent duplicate grants
 );
+CREATE TABLE IF NOT EXISTS account (
+    id         VARCHAR(20) PRIMARY KEY,       -- public account number, e.g. ACC-1001
+    user_id    UUID          NOT NULL,
+    type       VARCHAR(10)   NOT NULL CHECK (type IN ('checking', 'savings')),
+    nickname   VARCHAR(30),                   -- optional, set by the owner
+    balance    DECIMAL(15, 2) NOT NULL DEFAULT 0,
+    currency   VARCHAR(3)    NOT NULL DEFAULT 'USD',
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES bank_user(id) ON DELETE CASCADE
+);
