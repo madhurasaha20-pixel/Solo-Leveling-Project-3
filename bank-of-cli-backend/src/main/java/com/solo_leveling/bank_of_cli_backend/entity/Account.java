@@ -1,13 +1,20 @@
 package com.solo_leveling.bank_of_cli_backend.entity;
+
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Check;
+
 import java.math.BigDecimal;
 
 @Entity
-@Table(name = "account")
+@Table(name = "accounts")
 @Getter
 @Setter
 @NoArgsConstructor
 public class Account {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -22,5 +29,4 @@ public class Account {
 
     @Column(name = "userId", nullable = false)
     private Long userId;
-
 }
