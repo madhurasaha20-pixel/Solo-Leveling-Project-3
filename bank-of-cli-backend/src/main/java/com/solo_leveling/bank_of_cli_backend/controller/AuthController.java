@@ -21,4 +21,10 @@ public class AuthController {
         authService.register(request);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
+
+    // HTTP Basic authentication happens in the security filter chain; reaching here means it succeeded
+    @PostMapping("/login")
+    ResponseEntity<String> login() {
+        return ResponseEntity.ok("Login successful");
+    }
 }
