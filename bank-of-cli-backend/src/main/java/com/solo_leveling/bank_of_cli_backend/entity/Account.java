@@ -30,12 +30,13 @@ public class Account {
     @JoinColumn(name = "user_id", nullable = false, updatable = false)
     private BankUser user;
 
-    // "checking" or "savings"
-    @Column(nullable = false)
-    private String type;
+    // "checking" or "savings" (CHECK constraint in schema.sql)
+    @Column(name = "account_type", nullable = false)
+    private String accountType;
 
     private String nickname;
 
+    // never negative (CHECK constraint in schema.sql)
     @Column(nullable = false)
     private BigDecimal balance = BigDecimal.ZERO;
 

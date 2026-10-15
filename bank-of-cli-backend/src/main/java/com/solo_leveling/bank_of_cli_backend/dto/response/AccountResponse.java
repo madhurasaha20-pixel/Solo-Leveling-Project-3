@@ -19,7 +19,7 @@ public record AccountResponse(
         return new AccountResponse(
                 account.getId(),
                 account.getUser().getId().toString(),
-                account.getType(),
+                account.getAccountType(),
                 account.getNickname(),
                 account.getBalance(),
                 account.getCurrency());

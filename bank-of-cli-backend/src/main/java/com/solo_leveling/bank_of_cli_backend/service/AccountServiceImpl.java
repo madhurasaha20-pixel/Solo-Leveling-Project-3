@@ -32,7 +32,7 @@ public class AccountServiceImpl implements AccountService {
             account.setNickname(nickname.isEmpty() ? null : nickname);
         }
         if (request.type() != null) {
-            account.setType(request.type());
+            account.setAccountType(request.type());
         }
 
         return AccountResponse.from(accounts.save(account));

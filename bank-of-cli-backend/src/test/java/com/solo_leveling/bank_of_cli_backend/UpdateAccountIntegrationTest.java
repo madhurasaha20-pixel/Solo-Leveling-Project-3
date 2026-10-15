@@ -53,7 +53,7 @@ class UpdateAccountIntegrationTest {
         Account account = new Account();
         account.setId(accountId);
         account.setUser(user);
-        account.setType(type);
+        account.setAccountType(type);
         account.setBalance(new BigDecimal("25.00"));
         accounts.saveAndFlush(account);
     }
@@ -79,7 +79,7 @@ class UpdateAccountIntegrationTest {
 
         Account saved = accounts.findById("ACC-1001").orElseThrow();
         assertThat(saved.getNickname()).isEqualTo("Rainy day fund");
-        assertThat(saved.getType()).isEqualTo("savings");
+        assertThat(saved.getAccountType()).isEqualTo("savings");
     }
 
     @Test
@@ -131,7 +131,7 @@ class UpdateAccountIntegrationTest {
                 .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
                 .andExpect(jsonPath("$.field").value("type"));
 
-        assertThat(accounts.findById("ACC-1001").orElseThrow().getType()).isEqualTo("checking");
+        assertThat(accounts.findById("ACC-1001").orElseThrow().getAccountType()).isEqualTo("checking");
     }
 
     @Test
