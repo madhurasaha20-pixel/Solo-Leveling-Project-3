@@ -24,8 +24,10 @@ import java.util.Set;
 
 @Configuration
 public class SecurityConfiguration {
+    private static final String API = WebConfiguration.API_PREFIX;
+
     // a stale token must not block these, so the bearer header is ignored on them
-    private static final Set<String> TOKEN_IGNORED_PATHS = Set.of("/auth/login", "/auth/register");
+    private static final Set<String> TOKEN_IGNORED_PATHS = Set.of(API + "/auth/login", API + "/auth/register");
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -43,7 +45,7 @@ public class SecurityConfiguration {
                                                    UserIdJwtAuthenticationConverter jwtConverter) {
         http.authorizeHttpRequests(configurer ->
                 configurer
-                        .requestMatchers(HttpMethod.POST, "/auth/register", "/auth/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, API + "/auth/register", API + "/auth/login").permitAll()
                         .requestMatchers("/h2-console", "/h2-console/**").permitAll()
                         .requestMatchers("/docs/**", "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                         .anyRequest().authenticated()
