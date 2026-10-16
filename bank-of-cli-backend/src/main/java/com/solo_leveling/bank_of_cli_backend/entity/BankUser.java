@@ -9,6 +9,8 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Generated;
+import org.hibernate.generator.EventType;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -29,7 +31,8 @@ public class BankUser {
     @Column(nullable = false, unique = true)
     private String email;
 
-    // set by the database default
+    // the database default is the source of truth; Hibernate reads the value back after insert
+    @Generated(event = EventType.INSERT)
     @Column(name = "created_at", insertable = false, updatable = false)
     private Instant createdAt;
 }
