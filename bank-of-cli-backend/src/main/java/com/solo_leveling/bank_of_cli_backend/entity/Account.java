@@ -34,6 +34,8 @@ public class Account {
     @Column(name = "account_type", nullable = false)
     private String accountType;
 
+    //I just added in the @Column for it
+    @Column(name = "nickname")
     private String nickname;
 
     // never negative (CHECK constraint in schema.sql)
@@ -50,4 +52,28 @@ public class Account {
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
+
+    public void setUserForAccountModel(BankUser user) {
+        this.user = user;
+    }
+
+    public void setAccountTypeForAccountModel(String accountType) {
+        this.accountType = accountType;
+    }
+
+    public void setBalanceForAccountModel(BigDecimal balance) {
+        this.balance = balance;
+    }
+
+    public void setCurrencyForAccountModel(String currency) {
+        this.currency = currency;
+    }
+
+    public void setNicknameForAccountModel(String nickname) {
+        this.nickname = nickname;
+    }
+
+    public void setIdForAccountModel(String id) {
+        this.id = id;
+    }
 }
