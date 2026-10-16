@@ -11,6 +11,31 @@ must return the same shapes. **If you need a field changed, change it here first
 - Endpoints marked 🔒 need the header `Authorization: Bearer <token>`.
   The `authTokenInterceptor` adds it automatically after login.
 
+## Backend status
+
+The Spring backend serves every endpoint under `/api` and authenticates with a JWT.
+
+- The token is an opaque string to the frontend: never decode it, just send it back as
+  `Authorization: Bearer <token>`. It is signed (HS256) and carries only the user's id; it has
+  **no expiry yet**, so `logout` only needs to discard it on the client.
+- Ids from the real backend are not `u1`-style: `User.id` and `Account.userId` are UUID strings.
+  Treat all ids as opaque strings. (Account ids such as `ACC-1001` are unchanged.)
+- A missing, malformed, wrongly signed or stale token gives `401 UNAUTHORIZED`; the
+  `Authorization` header is ignored on login and register.
+- The backend allows browser requests from the origin(s) in `CORS_ALLOWED_ORIGINS`
+  (default `http://localhost:4200`).
+
+| Endpoint | Backend |
+|---|---|
+| `POST /api/auth/register`, `POST /api/auth/login`, `POST /api/auth/logout` | done |
+| `PATCH /api/accounts/{accountId}` | done |
+| `GET /api/accounts/me`, `GET /api/accounts` | not yet |
+| `GET /api/accounts/{accountId}/transactions` | not yet |
+| deposit, withdraw, transfer | not yet |
+
+`GET /api/accounts` (all of the user's accounts) is called by `AccountService.loadMyAccounts()`
+but has no section below yet.
+
 ---
 
 ## Data models
