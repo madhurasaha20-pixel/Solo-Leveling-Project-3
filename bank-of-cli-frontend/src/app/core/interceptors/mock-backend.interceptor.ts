@@ -58,6 +58,9 @@ function route(req: HttpRequest<unknown>, path: string, db: MockDb): Observable<
   if (method === 'GET' && (m = path.match(/^\/accounts\/([^/]+)\/transactions$/))) {
     return listTransactions(req, db, decodeURIComponent(m[1]));
   }
+  if (method === 'PATCH' && (m = path.match(/^\/accounts\/([^/]+)$/))) {
+    return updateAccount(req, db, decodeURIComponent(m[1]));
+  }
   if (method === 'POST' && (m = path.match(/^\/accounts\/([^/]+)\/(deposit|withdraw|transfer)$/))) {
     return moveMoney(req, db, decodeURIComponent(m[1]), m[2] as 'deposit' | 'withdraw' | 'transfer');
   }
@@ -155,6 +158,35 @@ function myAccounts(req: HttpRequest<unknown>, db: MockDb) {
     .map(a => ({ ...a }));
 
   return ok(accounts);
+}
+
+function updateAccount(req: HttpRequest<unknown>, db: MockDb, accountId: string) {
+  const user = currentUser(req, db);
+  if (!user) return unauthorized();
+
+  const account = db.accounts.find(a => a.id === accountId);
+  if (!account) return fail(404, 'ACCOUNT_NOT_FOUND', `Account ${accountId} does not exist.`);
+  if (account.userId !== user.id) return fail(403, 'FORBIDDEN', 'You do not have access to this account.');
+
+  const body = asRecord(req.body);
+  if (body['nickname'] !== undefined && body['nickname'] !== null) {
+    const nickname = str(body['nickname']).trim();
+    if (nickname.length > 30) {
+      return fail(400, 'VALIDATION_ERROR', 'Nickname must be 30 characters or fewer.', 'nickname');
+    }
+    if (nickname) account.nickname = nickname;
+    else delete account.nickname;
+  }
+  if (body['type'] !== undefined && body['type'] !== null) {
+    const type = str(body['type']);
+    if (type !== 'checking' && type !== 'savings') {
+      return fail(400, 'VALIDATION_ERROR', 'Account type must be checking or savings.', 'type');
+    }
+    account.type = type;
+  }
+
+  db.save();
+  return ok({ ...account });
 }
 
 function listTransactions(req: HttpRequest<unknown>, db: MockDb, accountId: string) {
