@@ -29,6 +29,7 @@ public class WireController {
         //This controller will take two users and one amount
         //It will authorize
         //It will add the amount to target while removing it from source
+        //Possibly talk to service layer for logic
 
 
         return ResponseEntity.ok("Successful! GOOD JOB YDUR, YOU GOT THIS ");
