@@ -36,6 +36,11 @@ public class GlobalExceptionHandler {
         return build(HttpStatus.CONFLICT, "EMAIL_TAKEN", e.getMessage(), "email");
     }
 
+    @ExceptionHandler(InvalidCredentialsException.class)
+    ResponseEntity<ApiError> handleInvalidCredentials(InvalidCredentialsException e) {
+        return build(HttpStatus.UNAUTHORIZED, "INVALID_CREDENTIALS", e.getMessage(), null);
+    }
+
     @ExceptionHandler(Exception.class)
     ResponseEntity<ApiError> handleUnexpected(Exception e) throws Exception {
         // let Spring Security's own handling (401/403) deal with these
