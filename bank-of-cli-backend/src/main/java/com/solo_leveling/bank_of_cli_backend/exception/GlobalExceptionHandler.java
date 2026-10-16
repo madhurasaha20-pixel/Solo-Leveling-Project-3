@@ -47,6 +47,16 @@ public class GlobalExceptionHandler {
         return build(HttpStatus.NOT_FOUND, "NOT_FOUND", "Resource not found.", null);
     }
 
+    @ExceptionHandler(AccountNotFoundException.class)
+    ResponseEntity<ApiError> handleAccountNotFound(AccountNotFoundException e) {
+        return build(HttpStatus.NOT_FOUND, "ACCOUNT_NOT_FOUND", e.getMessage(), null);
+    }
+
+    @ExceptionHandler(AccountForbiddenException.class)
+    ResponseEntity<ApiError> handleAccountForbidden(AccountForbiddenException e) {
+        return build(HttpStatus.FORBIDDEN, "FORBIDDEN", e.getMessage(), null);
+    }
+
     @ExceptionHandler(Exception.class)
     ResponseEntity<ApiError> handleUnexpected(Exception e) throws Exception {
         // let Spring Security's own handling (401/403) deal with these
