@@ -9,6 +9,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.UUID;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -84,6 +85,16 @@ class ProtectedAccessIntegrationTest extends ApiTestSupport {
         mockMvc.perform(post(LOGOUT).header(HttpHeaders.AUTHORIZATION, bearer(field(body, "$.token"))))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.code").value("UNAUTHORIZED"));
+    }
+
+    @Test
+    void unknownPathReturnsNotFoundBody() throws Exception {
+        String token = field(registerAndGetBody("Ada", "ada@example.com", "correct-horse"), "$.token");
+
+        mockMvc.perform(get("/api/does-not-exist").header(HttpHeaders.AUTHORIZATION, bearer(token)))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.code").value("NOT_FOUND"));
     }
 
     @Test
