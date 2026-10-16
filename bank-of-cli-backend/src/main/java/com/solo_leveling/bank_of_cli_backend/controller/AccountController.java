@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/accounts")
@@ -18,11 +19,11 @@ public class AccountController {
         this.accountService = accountService;
     }
 
-    // principal is the logged-in user's email (see DatabaseUserDetailsService)
+    // the principal name is the logged-in user's id (the token's subject, see UserIdJwtAuthenticationConverter)
     @PatchMapping("/{accountId}")
     ResponseEntity<AccountResponse> updateAccount(@PathVariable String accountId,
                                                   @Valid @RequestBody UpdateAccountRequest request,
                                                   Principal principal) {
-        return ResponseEntity.ok(accountService.updateAccount(accountId, principal.getName(), request));
+        return ResponseEntity.ok(accountService.updateAccount(accountId, UUID.fromString(principal.getName()), request));
     }
 }
