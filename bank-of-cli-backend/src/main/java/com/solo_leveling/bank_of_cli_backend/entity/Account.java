@@ -10,7 +10,9 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Generated;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.generator.EventType;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -43,7 +45,8 @@ public class Account {
     @Column(nullable = false)
     private String currency = "USD";
 
-    // set by the database default
+    // the database default is the source of truth; Hibernate reads the value back after insert
+    @Generated(event = EventType.INSERT)
     @Column(name = "created_at", insertable = false, updatable = false)
     private Instant createdAt;
 
