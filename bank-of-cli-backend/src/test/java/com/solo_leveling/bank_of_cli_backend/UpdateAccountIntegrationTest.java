@@ -7,34 +7,29 @@ import com.solo_leveling.bank_of_cli_backend.repository.BankUserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
-@AutoConfigureMockMvc
-@Transactional // rolls back after each test so tests don't share users or accounts
-class UpdateAccountIntegrationTest {
+class UpdateAccountIntegrationTest extends ApiTestSupport {
     static final String PASSWORD = "correct-horse";
 
-    @Autowired
-    MockMvc mockMvc;
     @Autowired
     BankUserRepository users;
     @Autowired
     AccountRepository accounts;
+
+    // login token of each registered user, by email
+    private final Map<String, String> tokens = new HashMap<>();
 
     @BeforeEach
     void setUp() throws Exception {
@@ -42,12 +37,9 @@ class UpdateAccountIntegrationTest {
         createUserWithAccount("Grace", "grace@example.com", "ACC-1002", "checking");
     }
 
-    // registers through the real endpoint so the login works, then gives the user an account
+    // registers through the real endpoint to get a token, then gives the user an account
     private void createUserWithAccount(String name, String email, String accountId, String type) throws Exception {
-        mockMvc.perform(post("/auth/register").contentType(MediaType.APPLICATION_JSON).content("""
-                        {"name": "%s", "email": "%s", "password": "%s"}
-                        """.formatted(name, email, PASSWORD)))
-                .andExpect(status().isCreated());
+        tokens.put(email, field(registerAndGetBody(name, email, PASSWORD), "$.token"));
 
         BankUser user = users.findByEmail(email).orElseThrow();
         Account account = new Account();
@@ -59,8 +51,8 @@ class UpdateAccountIntegrationTest {
     }
 
     private ResultActions update(String email, String accountId, String json) throws Exception {
-        return mockMvc.perform(patch("/accounts/" + accountId)
-                .with(httpBasic(email, PASSWORD))
+        return mockMvc.perform(patch("/api/accounts/" + accountId)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + tokens.get(email))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(json));
     }
@@ -158,11 +150,12 @@ class UpdateAccountIntegrationTest {
 
     @Test
     void requiresLogin() throws Exception {
-        mockMvc.perform(patch("/accounts/ACC-1001")
+        mockMvc.perform(patch("/api/accounts/ACC-1001")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {"nickname": "Bills"}
                                 """))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("UNAUTHORIZED"));
     }
 }
