@@ -19,10 +19,12 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.server.resource.InvalidBearerTokenException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Locale;
+import java.util.UUID;
 
 @Service
 public class AuthServiceImpl implements AuthService {
@@ -50,6 +52,13 @@ public class AuthServiceImpl implements AuthService {
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
         this.tokenService = tokenService;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public UserResponse getProfile(UUID userId) {
+        return users.findById(userId).map(UserResponse::from)
+                .orElseThrow(() -> new InvalidBearerTokenException("Token subject does not exist"));
     }
 
     @Override
