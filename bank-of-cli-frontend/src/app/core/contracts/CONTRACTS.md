@@ -144,6 +144,14 @@ user sees errors instantly.
 
 ## Endpoints
 
+### GET `/api/auth/me` (protected)
+
+Returns `200 OK` with the current **User** (`id`, `name`, `email`, `createdAt`).
+The server identifies the user from the JWT; no user id is accepted from the client.
+Passwords and credentials are never included. Implemented by the Spring backend and mock.
+
+Errors: `401 UNAUTHORIZED` for a missing or invalid token.
+
 ### POST `/api/auth/login`
 Request
 ```json
