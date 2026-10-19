@@ -51,6 +51,11 @@ function route(req: HttpRequest<unknown>, path: string, db: MockDb): Observable<
   if (method === 'POST' && path === '/auth/login') return login(req, db);
   if (method === 'POST' && path === '/auth/register') return register(req, db);
   if (method === 'POST' && path === '/auth/logout') return ok(null, 204);
+  if (method === 'GET' && path === '/auth/me') {
+    const user = currentUser(req, db);
+    if (!user) return fail(401, 'UNAUTHORIZED', 'Please sign in to continue.');
+    return ok(publicUser(user));
+  }
 
   if (method === 'GET' && path === '/accounts/me') return myAccount(req, db);
   if (method === 'GET' && path === '/accounts') return myAccounts(req, db);
