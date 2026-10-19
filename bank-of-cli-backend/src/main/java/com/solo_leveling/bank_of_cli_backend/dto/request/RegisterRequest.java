@@ -16,7 +16,7 @@ public record RegisterRequest(
 
         // BCrypt only uses the first 72 bytes, so cap the length
         @NotBlank(message = "Password is required.")
-        @Size(min = 8, max = 72, message = "Password must be 8 to 72 characters.")
+        @Size(min = 6, max = 72, message = "Password must be at least 6 characters.")
         String password
 ) {
 }

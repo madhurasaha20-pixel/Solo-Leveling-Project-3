@@ -1,6 +1,8 @@
 package com.solo_leveling.bank_of_cli_backend.controller;
 
+import com.solo_leveling.bank_of_cli_backend.dto.request.LoginRequest;
 import com.solo_leveling.bank_of_cli_backend.dto.request.RegisterRequest;
+import com.solo_leveling.bank_of_cli_backend.dto.response.AuthResponse;
 import com.solo_leveling.bank_of_cli_backend.service.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -17,14 +19,19 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    ResponseEntity<Void> register(@Valid @RequestBody RegisterRequest request) {
-        authService.register(request);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+    ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(authService.register(request));
     }
 
-    // HTTP Basic authentication happens in the security filter chain; reaching here means it succeeded
     @PostMapping("/login")
-    ResponseEntity<String> login() {
-        return ResponseEntity.ok("Login successful");
+    ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
+        return ResponseEntity.ok(authService.login(request));
+    }
+
+    // tokens are stateless and have no expiry yet, so there is nothing to revoke server-side;
+    // the client discards its token. Requires a valid token like any protected endpoint.
+    @PostMapping("/logout")
+    ResponseEntity<Void> logout() {
+        return ResponseEntity.noContent().build();
     }
 }

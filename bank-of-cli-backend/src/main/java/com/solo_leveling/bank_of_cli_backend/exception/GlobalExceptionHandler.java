@@ -11,6 +11,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -34,6 +35,26 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(EmailTakenException.class)
     ResponseEntity<ApiError> handleEmailTaken(EmailTakenException e) {
         return build(HttpStatus.CONFLICT, "EMAIL_TAKEN", e.getMessage(), "email");
+    }
+
+    @ExceptionHandler(InvalidCredentialsException.class)
+    ResponseEntity<ApiError> handleInvalidCredentials(InvalidCredentialsException e) {
+        return build(HttpStatus.UNAUTHORIZED, "INVALID_CREDENTIALS", e.getMessage(), null);
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    ResponseEntity<ApiError> handleNotFound(NoResourceFoundException e) {
+        return build(HttpStatus.NOT_FOUND, "NOT_FOUND", "Resource not found.", null);
+    }
+
+    @ExceptionHandler(AccountNotFoundException.class)
+    ResponseEntity<ApiError> handleAccountNotFound(AccountNotFoundException e) {
+        return build(HttpStatus.NOT_FOUND, "ACCOUNT_NOT_FOUND", e.getMessage(), null);
+    }
+
+    @ExceptionHandler(AccountForbiddenException.class)
+    ResponseEntity<ApiError> handleAccountForbidden(AccountForbiddenException e) {
+        return build(HttpStatus.FORBIDDEN, "FORBIDDEN", e.getMessage(), null);
     }
 
     @ExceptionHandler(Exception.class)
