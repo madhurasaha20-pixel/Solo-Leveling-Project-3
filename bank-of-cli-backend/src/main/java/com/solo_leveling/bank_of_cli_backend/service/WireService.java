@@ -14,13 +14,7 @@ public class WireService {
 
     public List<Account> executeWireTransfer() {
         //Grab Accounts from database
-        List<Account> accounts = List.of(
-                new Account("ACC001", "CHECKING", "Main Checking", new BigDecimal("2500.00"), "USD", Instant.now(), Instant.now()),
 
-                new Account("ACC002", "SAVINGS", "Emergency Savings", new BigDecimal("10000.50"), "USD", Instant.now(), Instant.now()),
-
-                new Account("ACC003", "CHECKING", "Travel Fund", new BigDecimal("750.25"), "EUR", Instant.now(), Instant.now())
-        );
 
         //Set accounts to variables
         Account account1 = accounts.get(0);
