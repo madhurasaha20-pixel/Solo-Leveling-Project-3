@@ -37,3 +37,14 @@ CREATE TABLE IF NOT EXISTS account (
     updated_at   TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES bank_user(id) ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS bank_transaction (
+    id               UUID PRIMARY KEY,
+    account_id       VARCHAR(20)    NOT NULL,
+    transaction_type VARCHAR(20)    NOT NULL CHECK (
+        transaction_type IN ('DEPOSIT', 'WITHDRAWAL', 'TRANSFER_IN', 'TRANSFER_OUT')
+    ),
+    amount           DECIMAL(15, 2) NOT NULL CHECK (amount > 0),
+    created_at       TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (account_id) REFERENCES account(id)
+    );
