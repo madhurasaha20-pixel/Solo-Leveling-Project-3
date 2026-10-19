@@ -21,8 +21,18 @@ import java.time.Instant;
 @Table(name = "account")
 @Getter
 @Setter
-@NoArgsConstructor
+//@NoArgsConstructor
 public class Account {
+    public Account(String id, String accountType, String nickname, BigDecimal balance, String currency, Instant createdAt, Instant updatedAt) {
+        this.id = id;
+        this.accountType = accountType;
+        this.nickname = nickname;
+        this.balance = balance;
+        this.currency = currency;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
+
     // public account number (e.g. ACC-1001), assigned when the account is created
     @Id
     @Column(updatable = false)
