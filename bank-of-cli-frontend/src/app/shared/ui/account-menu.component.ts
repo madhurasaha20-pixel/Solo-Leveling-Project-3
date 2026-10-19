@@ -1,5 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, ElementRef, computed, inject, input, output, signal, viewChild } from '@angular/core';
+import { RouterLink } from '@angular/router';
 
 import { Account, User } from '../../core/models';
 import { BalanceVisibilityService } from '../../core/services/balance-visibility.service';
@@ -17,7 +18,7 @@ import { IconComponent } from './icon.component';
  */
 @Component({
   selector: 'bc-account-menu',
-  imports: [DatePipe, MoneyPipe, ButtonComponent, IconComponent],
+  imports: [DatePipe, RouterLink, MoneyPipe, ButtonComponent, IconComponent],
   templateUrl: './account-menu.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {

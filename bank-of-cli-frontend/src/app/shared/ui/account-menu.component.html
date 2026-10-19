@@ -74,6 +74,10 @@
 
     <!-- 5. Sign out -->
     <div class="p-2">
+      <a routerLink="/profile" (click)="open.set(false)"
+         class="flex h-10 w-full items-center rounded-md px-2 text-body font-medium text-ink-muted transition-colors duration-[120ms] ease-out hover:bg-surface-sunken hover:text-ink">
+        View profile
+      </a>
       <button type="button" (click)="open.set(false); signOut.emit()"
               class="flex h-10 w-full cursor-pointer items-center gap-2 rounded-md px-2 text-body font-medium text-debit transition-colors duration-[120ms] ease-out hover:bg-debit-tint">
         <bc-icon name="log-out" [size]="16" />Sign out
