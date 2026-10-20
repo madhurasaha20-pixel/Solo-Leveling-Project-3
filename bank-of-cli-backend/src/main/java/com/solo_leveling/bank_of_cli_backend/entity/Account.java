@@ -21,7 +21,7 @@ import java.time.Instant;
 @Table(name = "account")
 @Getter
 @Setter
-//@NoArgsConstructor
+@NoArgsConstructor
 public class Account {
     public Account(String id, String accountType, String nickname, BigDecimal balance, String currency, Instant createdAt, Instant updatedAt) {
         this.id = id;

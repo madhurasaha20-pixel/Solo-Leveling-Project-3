@@ -1,34 +1,37 @@
 package com.solo_leveling.bank_of_cli_backend.service;
-
 import com.solo_leveling.bank_of_cli_backend.entity.Account;
-import org.springframework.http.ResponseEntity;
+import com.solo_leveling.bank_of_cli_backend.repository.AccountRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.ResponseBody;
-
 import java.math.BigDecimal;
-import java.time.Instant;
 import java.util.List;
+
+
+//Create the service class and make it a bean
 
 @Service
 public class WireService {
+    //Define Injected vars & Inject user DAO into wire service/ use construct injection
+    private final AccountRepository accountRepository;
 
-    public List<Account> executeWireTransfer() {
-        //Grab Accounts from database
+    @Autowired
+    public WireService(AccountRepository accountRepository) {
+        this.accountRepository = accountRepository;
+    }
 
-
-        //Set accounts to variables
-        Account account1 = accounts.get(0);
-        Account account2 = accounts.get(1);
-        BigDecimal amount = BigDecimal.valueOf(500);
-
+    //Define transfer method
+    public void executeWireTransfer(String accountFrom, String accountTo, BigDecimal amount) {
         // Validate accounts and transfer rules
-        // Debit the sender's account
+        //Take a string and convert it
+        Account account1 = accountRepository.findById(accountFrom).orElseThrow(() -> new RuntimeException("Source not found."));
+        Account account2 = accountRepository.findById(accountTo).orElseThrow(() -> new RuntimeException("Source not found."));
+
+        //Use the entity setter to change the balance
         account1.setBalance(account1.getBalance().subtract(amount));
-        // Credit the recipient's account
-        account2.setBalance(account2.getBalance().add(amount));
-        // Record the transaction
-        // Return the transfer result
-        return accounts;
+        account2.setBalance(account2.getBalance().subtract(amount));
+        //call user DAOs save method
+        accountRepository.save(account1);
+        accountRepository.save(account2);
     }
 
 }
