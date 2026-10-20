@@ -48,3 +48,8 @@ CREATE TABLE IF NOT EXISTS bank_transaction (
     created_at       TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (account_id) REFERENCES account(id)
     );
+
+--I added this for the account id generation part
+CREATE SEQUENCE IF NOT EXISTS account_id_seq
+    START WITH 1001
+    INCREMENT BY 1;
