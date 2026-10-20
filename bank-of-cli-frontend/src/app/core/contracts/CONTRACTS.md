@@ -33,6 +33,7 @@ The Spring backend serves every endpoint under `/api` and authenticates with a J
 | `GET /api/accounts/me`, `GET /api/accounts` | not yet |
 | `GET /api/accounts/{accountId}/transactions` | not yet |
 | deposit, withdraw, transfer | not yet |
+| DELETE /api/users/me | done |
 
 `GET /api/accounts` (all of the user's accounts) is called by `AccountService.loadMyAccounts()`
 but has no section below yet.
@@ -115,6 +116,7 @@ on the receiver's account.
 | `ACCOUNT_NOT_FOUND` | 404 | Account id does not exist |
 | `NOT_FOUND` | 404 | Unknown endpoint |
 | `EMAIL_TAKEN` | 409 | Register with an email already in use |
+| BALANCE_NOT_ZERO | 409 | Delete your profile while an account still holds money |
 | `INSUFFICIENT_FUNDS` | 422 | Withdraw or transfer more than the balance |
 | `NETWORK_ERROR` | 0 | Server unreachable (created by the frontend, never sent by the server) |
 | `UNKNOWN` | 500 | Anything else |
@@ -179,6 +181,23 @@ Errors: `400 VALIDATION_ERROR`, `409 EMAIL_TAKEN`
 ### POST `/api/auth/logout` 🔒
 No body. `204 No Content`.
 
+### DELETE `/api/users/me` 🔒
+Permanently deletes the logged-in user (the token's owner) **and** all of their accounts and
+transaction history. All or nothing. Afterwards the old token gives `401` and the email can be
+registered again. The user re-enters their password to confirm. **Every account must be at $0
+first**, so no money disappears; the user withdraws or transfers it out beforehand.
+
+Request
+```json
+{ "password": "password" }
+```
+`204 No Content`.
+
+Errors:
+- `400 VALIDATION_ERROR` (`field: "password"`): `"Password is required."` or `"Incorrect password."`
+  (deliberately not 401, so the client doesn't treat a typo as an expired session)
+- `409 BALANCE_NOT_ZERO` when any account still holds money (checked after the password). Nothing is deleted.
+- `401 UNAUTHORIZED`
 ### GET `/api/accounts/me` 🔒
 200 OK: an **Account**.
 
