@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject, Observable, catchError, map, tap, throwError } from 'rxjs';
+import { AuthResponse, DeleteUserRequest, LoginRequest, RegisterRequest, User } from '../models';
 
 import { environment } from '../../../environments/environment';
 import { AuthResponse, LoginRequest, RegisterRequest, User } from '../models';
@@ -64,10 +65,16 @@ export class AuthService {
   /** Clears the session immediately. Navigate to /login afterwards. */
   logout(): void {
     this.http.post<void>(`${this.api}/auth/logout`, {}).subscribe({ error: () => { /* already logged out locally */ } });
-    this.session = null;
-    try { sessionStorage.removeItem(SESSION_KEY); } catch { /* ignore */ }
-    this.userSubject.next(null);
+    this.clearSession();
   }
+  deleteAccount(password: string): Observable<void> {
+    const body: DeleteUserRequest = { password };
+    return this.http.delete<void>(`${this.api}/users/me`, { body }).pipe(
+        tap(() => this.clearSession()),
+        catchError(err => throwError(() => toApiError(err)))
+    );
+  }
+
 
   private startSession(res: AuthResponse): void {
     this.session = res;
