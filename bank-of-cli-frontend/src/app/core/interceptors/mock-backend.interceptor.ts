@@ -22,12 +22,13 @@ import {
 /**
  * THE MOCK SERVER.
  *
- * Services make normal HttpClient calls to environment.apiBase (e.g. POST /api/auth/login).
+ * Services make normal HttpClient calls to environment.apiBase (e.g. GET /api/accounts).
  * This interceptor catches those calls and answers them exactly as CONTRACTS.md says
  * the real backend will, including status codes, error bodies and a fake delay.
+ * /api/auth/* is not mocked: it always goes to the real backend.
  *
- * When the real backend is ready: set environment.useMockBackend = false.
- * No service or component has to change.
+ * As each route goes live on the backend, delete its handler here. Once none are left,
+ * set environment.useMockBackend = false. No service or component has to change.
  */
 export const mockBackendInterceptor: HttpInterceptorFn = (req, next) => {
   if (!environment.useMockBackend || !req.url.startsWith(environment.apiBase)) {

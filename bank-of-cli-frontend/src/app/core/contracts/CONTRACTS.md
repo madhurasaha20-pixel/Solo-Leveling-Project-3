@@ -1,7 +1,8 @@
 # Bank of CLI: API Contracts
 
-This is the agreement between the frontend and the future backend. The mock backend
-(`core/interceptors/mock-backend.interceptor.ts`) follows it exactly, and the real backend
+This is the agreement between the frontend and the backend. The mock backend
+(`core/interceptors/mock-backend.interceptor.ts`) follows it exactly for the routes it still
+answers (everything except `/api/auth/*`, which goes to the real backend), and the real backend
 must return the same shapes. **If you need a field changed, change it here first, then in
 `core/models/`, then in the mock.**
 
@@ -152,8 +153,8 @@ Request
 200 OK
 ```json
 {
-  "token": "mock-token.u1",
-  "user": { "id": "u1", "name": "Demo User", "email": "user@example.com", "createdAt": "2026-01-05T15:00:00.000Z" }
+  "token": "eyJhbGciOiJIUzI1NiJ9...",
+  "user": { "id": "3f6c1a2e-8b4d-4e1f-9a7c-2d5e8f0b1c34", "name": "Demo User", "email": "user@example.com", "createdAt": "2026-01-05T15:00:00.000Z" }
 }
 ```
 Errors: `400 VALIDATION_ERROR` (empty field), `401 INVALID_CREDENTIALS`
@@ -162,7 +163,7 @@ Errors: `400 VALIDATION_ERROR` (empty field), `401 INVALID_CREDENTIALS`
 ```
 
 ### POST `/api/auth/register`
-Creates the user **and** a checking account with a $0 balance, then logs them in.
+Creates the user, then logs them in. No accounts are created; the user opens them later.
 
 Request
 ```json
@@ -242,6 +243,10 @@ Errors:
 ## Mock test accounts
 
 From `src/assets/mock-data/`. Changes are kept in sessionStorage until the tab closes.
+
+> **These logins no longer work.** Login and register now go to the real backend, so register a
+> user there instead. The mock's account routes only accept the old mock tokens, so they answer
+> `401 UNAUTHORIZED` to a real token until each route is connected to the backend.
 
 | Email | Password | Account | Starting balance | Good for testing |
 |---|---|---|---|---|

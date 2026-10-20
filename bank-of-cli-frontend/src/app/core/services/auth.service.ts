@@ -52,7 +52,7 @@ export class AuthService {
     );
   }
 
-  /** Creates the user AND a $0 checking account, then logs them in. Errors: VALIDATION_ERROR, EMAIL_TAKEN */
+  /** Creates the user (with no accounts), then logs them in. Errors: VALIDATION_ERROR, EMAIL_TAKEN */
   register(req: RegisterRequest): Observable<User> {
     return this.http.post<AuthResponse>(`${this.api}/auth/register`, req).pipe(
       tap(res => this.startSession(res)),
