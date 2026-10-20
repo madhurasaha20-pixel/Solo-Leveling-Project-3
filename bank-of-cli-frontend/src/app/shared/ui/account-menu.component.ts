@@ -7,6 +7,7 @@ import { ThemeService } from '../../core/services/theme.service';
 import { MoneyPipe } from '../pipes/money.pipe';
 import { ButtonComponent } from './button.component';
 import { IconComponent } from './icon.component';
+import { DeleteAccountDialogComponent } from './delete-account-dialog.component';
 
 
 
@@ -17,7 +18,7 @@ import { IconComponent } from './icon.component';
  */
 @Component({
   selector: 'bc-account-menu',
-  imports: [DatePipe, MoneyPipe, ButtonComponent, IconComponent],
+  imports: [DatePipe, MoneyPipe, ButtonComponent, IconComponent, DeleteAccountDialogComponent],
   templateUrl: './account-menu.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
@@ -30,9 +31,11 @@ export class AccountMenuComponent {
   readonly user = input.required<User>();
   readonly account = input<Account | null>(null);
   readonly signOut = output<void>();
+  readonly accountDeleted = output<void>();
 
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly trigger = viewChild.required<ElementRef<HTMLButtonElement>>('trigger');
+  private readonly deleteDialog = viewChild.required(DeleteAccountDialogComponent);
   private copiedTimer?: ReturnType<typeof setTimeout>;
 
   protected readonly open = signal(false);
@@ -59,7 +62,15 @@ export class AccountMenuComponent {
     this.open.set(false);
     this.trigger().nativeElement.focus();
   }
+  protected openDeleteDialog(): void {
+    this.open.set(false);
+    this.deleteDialog().open();
+  }
 
+  /** Cancelled: give focus back to the menu button, since the menu item that opened the dialog is gone. */
+  protected onDeleteDialogClosed(): void {
+    this.trigger().nativeElement.focus();
+  }
   protected async copyAccountNumber(id: string): Promise<void> {
     await navigator.clipboard.writeText(id);
     this.copied.set(true);

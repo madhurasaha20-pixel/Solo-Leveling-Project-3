@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 
-export type IconName = 'check' | 'check-circle' | 'x' | 'info' | 'alert' | 'chevron-down' | 'copy' | 'sun' | 'moon' | 'log-out';
+export type IconName = 'check' | 'check-circle' | 'x' | 'info' | 'alert' | 'chevron-down' | 'copy' | 'sun' | 'moon' | 'log-out' | 'trash';
 
 const PATHS: Record<IconName, string> = {
   check: 'M4.5 10.5l3.5 3.5 7.5-8',
@@ -13,6 +13,7 @@ const PATHS: Record<IconName, string> = {
   sun: 'M10 7a3 3 0 1 0 0 6a3 3 0 1 0 0-6zM10 2.5V4M10 16v1.5M2.5 10H4M16 10h1.5M4.7 4.7l1.06 1.06M14.24 14.24l1.06 1.06M4.7 15.3l1.06-1.06M14.24 5.76l1.06-1.06',
   moon: 'M16.5 11.5A6.5 6.5 0 0 1 8.5 3.5a6.5 6.5 0 1 0 8 8z',
   'log-out': 'M8 3.5H4.5v13H8M13 13.5l3.5-3.5L13 6.5M16.5 10H8',
+  trash: 'M3.5 5.5h13M8 5.5v-2h4v2M5 5.5l.75 11h8.5l.75-11M8.5 9v4.5M11.5 9v4.5',
 };
 const CIRCLED: IconName[] = ['check-circle', 'info', 'alert'];
 

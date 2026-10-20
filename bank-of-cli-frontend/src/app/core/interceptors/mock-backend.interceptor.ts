@@ -66,6 +66,37 @@ function route(req: HttpRequest<unknown>, path: string, db: MockDb): Observable<
 
   return fail(404, 'NOT_FOUND', `No mock endpoint for ${method} ${path}`);
 }
+function deleteMe(req: HttpRequest<unknown>, db: MockDb) {
+  const user = currentUser(req, db);
+  if (!user) return unauthorized();
+
+  const password = str(asRecord(req.body)['password']);
+  if (!password) return fail(400, 'VALIDATION_ERROR', 'Password is required.', 'password');
+  if (password !== user.password) return fail(400, 'VALIDATION_ERROR', 'Incorrect password.', 'password');
+
+  // every account must be emptied first, so no money disappears
+  const remaining = money(db.accounts.filter(a => a.userId === user.id).reduce((sum, a) => sum + a.balance, 0));
+  if (remaining > 0) {
+    const amount = remaining.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+    return fail(409, 'BALANCE_NOT_ZERO',
+        `You still have ${amount} in your accounts. Withdraw or transfer it first, so every account is at $0.`);
+  }
+
+  // same order as the real backend: history, then accounts, then the user
+  const accountIds = new Set(db.accounts.filter(a => a.userId === user.id).map(a => a.id));
+  removeWhere(db.transactions, t => accountIds.has(t.accountId));
+  removeWhere(db.accounts, a => a.userId === user.id);
+  removeWhere(db.users, u => u.id === user.id);
+  db.save();
+  return ok(null, 204);
+}
+
+/** Removes matching items in place (MockDb exposes its arrays, not setters). */
+function removeWhere<T>(items: T[], matches: (item: T) => boolean): void {
+  for (let i = items.length - 1; i >= 0; i--) {
+    if (matches(items[i])) items.splice(i, 1);
+  }
+}
 
 // ---------------------------------------------------------------------------
 // Account endpoints
