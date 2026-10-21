@@ -61,6 +61,19 @@ export class AuthService {
     );
   }
 
+  /** Fetches current profile details from the server. */
+  loadProfile(): Observable<User> {
+    return this.http.get<User>(`${this.api}/auth/me`).pipe(
+      tap(user => {
+        // Keep the header and persisted identity in sync with the server.
+        if (this.session?.user.id === user.id) {
+          this.startSession({ ...this.session, user });
+        }
+      }),
+      catchError(err => throwError(() => toApiError(err)))
+    );
+  }
+
   /** Clears the session immediately. Navigate to /login afterwards. */
   logout(): void {
     this.http.post<void>(`${this.api}/auth/logout`, {}).subscribe({ error: () => { /* already logged out locally */ } });

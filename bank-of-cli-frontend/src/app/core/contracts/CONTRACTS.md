@@ -29,6 +29,7 @@ The Spring backend serves every endpoint under `/api` and authenticates with a J
 | Endpoint | Backend |
 |---|---|
 | `POST /api/auth/register`, `POST /api/auth/login`, `POST /api/auth/logout` | done |
+| `GET /api/auth/me` | done |
 | `PATCH /api/accounts/{accountId}` | done |
 | `GET /api/accounts/me`, `GET /api/accounts` | not yet |
 | `GET /api/accounts/{accountId}/transactions` | not yet |
@@ -146,6 +147,15 @@ user sees errors instantly.
 ---
 
 ## Endpoints
+
+### GET `/api/auth/me` (protected)
+
+Returns `200 OK` with the current **User** (`id`, `name`, `email`, `createdAt`).
+The server identifies the user from the JWT; no user id is accepted from the client.
+Passwords and credentials are never included. Implemented by the Spring backend;
+this endpoint bypasses the frontend mock interceptor, like the other auth routes.
+
+Errors: `401 UNAUTHORIZED` for a missing or invalid token.
 
 ### POST `/api/auth/login`
 Request
