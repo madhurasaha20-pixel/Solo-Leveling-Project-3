@@ -32,10 +32,12 @@ import { provideCore } from './core/core.providers';
 `account$` and `recent$` refresh automatically after any deposit, withdraw or transfer.
 
 ## Test logins
-`user@example.com` / `password` (normal), `sam@example.com` / `password123` ($25, for insufficient funds).
-Transfer target: `ACC-1002`. Full list in CONTRACTS.md.
+Login and register go to the real backend (run it on port 8080; `ng serve` proxies `/api` to it).
+Register a user there. The old mock logins in CONTRACTS.md no longer work.
 
 ## How the mock works
-`interceptors/mock-backend.interceptor.ts` pretends to be the server, with a ~0.7 to 1 second delay
-so loading states show. Data starts from `src/assets/mock-data/*.json` and changes are kept until the tab closes.
-When the real backend exists, set `useMockBackend: false` in `environments/environment.ts`. Nothing else changes.
+`interceptors/mock-backend.interceptor.ts` pretends to be the server for every route except `/api/auth/*`,
+with a ~0.7 to 1 second delay so loading states show. Data starts from `src/assets/mock-data/*.json` and
+changes are kept until the tab closes. It only accepts the old mock tokens, so account routes answer
+`401` to a real login until they are connected. When a route is live on the backend, delete its handler
+from the mock; once none are left, set `useMockBackend: false` (or remove the mock).

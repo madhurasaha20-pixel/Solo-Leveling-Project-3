@@ -14,29 +14,32 @@ import {
   Account,
   ApiError,
   ApiErrorCode,
-  AuthResponse,
   Transaction,
   TransactionResponse,
-  TransactionType,
-  User
+  TransactionType
 } from '../models';
 
 /**
  * THE MOCK SERVER.
  *
- * Services make normal HttpClient calls to environment.apiBase (e.g. POST /api/auth/login).
+ * Services make normal HttpClient calls to environment.apiBase (e.g. GET /api/accounts).
  * This interceptor catches those calls and answers them exactly as CONTRACTS.md says
  * the real backend will, including status codes, error bodies and a fake delay.
+ * /api/auth/* is not mocked: it always goes to the real backend.
  *
- * When the real backend is ready: set environment.useMockBackend = false.
- * No service or component has to change.
+ * As each route goes live on the backend, delete its handler here. Once none are left,
+ * set environment.useMockBackend = false. No service or component has to change.
  */
 export const mockBackendInterceptor: HttpInterceptorFn = (req, next) => {
   if (!environment.useMockBackend || !req.url.startsWith(environment.apiBase)) {
     return next(req);
   }
-  const db = inject(MockDb);
   const path = req.url.slice(environment.apiBase.length).split('?')[0];
+  // auth and user (delete account) are served by the real backend; only the account routes are still mocked
+  if (path.startsWith('/auth/') || path.startsWith('/users/')) {
+    return next(req);
+  }
+  const db = inject(MockDb);
   return route(req, path, db);
 };
 
@@ -47,10 +50,6 @@ export const mockBackendInterceptor: HttpInterceptorFn = (req, next) => {
 function route(req: HttpRequest<unknown>, path: string, db: MockDb): Observable<HttpEvent<unknown>> {
   const { method } = req;
   let m: RegExpMatchArray | null;
-
-  if (method === 'POST' && path === '/auth/login') return login(req, db);
-  if (method === 'POST' && path === '/auth/register') return register(req, db);
-  if (method === 'POST' && path === '/auth/logout') return ok(null, 204);
 
   if (method === 'GET' && path === '/accounts/me') return myAccount(req, db);
   if (method === 'GET' && path === '/accounts') return myAccounts(req, db);
@@ -66,74 +65,6 @@ function route(req: HttpRequest<unknown>, path: string, db: MockDb): Observable<
   }
 
   return fail(404, 'NOT_FOUND', `No mock endpoint for ${method} ${path}`);
-}
-
-// ---------------------------------------------------------------------------
-// Auth endpoints
-// ---------------------------------------------------------------------------
-
-function login(req: HttpRequest<unknown>, db: MockDb) {
-  const body = asRecord(req.body);
-  const email = str(body['email']).trim().toLowerCase();
-  const password = str(body['password']);
-
-  if (!email) return fail(400, 'VALIDATION_ERROR', 'Email is required.', 'email');
-  if (!password) return fail(400, 'VALIDATION_ERROR', 'Password is required.', 'password');
-
-  const user = db.users.find(u => u.email.toLowerCase() === email);
-  if (!user || user.password !== password) {
-    // Same message either way, so the UI can't reveal which emails exist
-    return fail(401, 'INVALID_CREDENTIALS', 'Incorrect email or password.');
-  }
-  const res: AuthResponse = { token: tokenFor(user), user: publicUser(user) };
-  return ok(res);
-}
-
-function register(req: HttpRequest<unknown>, db: MockDb) {
-  const body = asRecord(req.body);
-  const name = str(body['name']).trim();
-  const email = str(body['email']).trim().toLowerCase();
-  const password = str(body['password']);
-
-  if (!name) return fail(400, 'VALIDATION_ERROR', 'Name is required.', 'name');
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    return fail(400, 'VALIDATION_ERROR', 'Enter a valid email address.', 'email');
-  }
-  if (password.length < 6) {
-    return fail(400, 'VALIDATION_ERROR', 'Password must be at least 6 characters.', 'password');
-  }
-  if (db.users.some(u => u.email.toLowerCase() === email)) {
-    return fail(409, 'EMAIL_TAKEN', 'An account with that email already exists.', 'email');
-  }
-
-  const user: UserRecord = {
-    id: db.newId('u'),
-    name,
-    email,
-    password,
-    createdAt: new Date().toISOString()
-  };
-  const checkingAccount: Account = {
-  id: db.newId('ACC-'),
-  userId: user.id,
-  type: 'checking',
-  balance: 0,
-  currency: 'USD'
-};
-
-const savingsAccount: Account = {
-  id: db.newId('ACC-'),
-  userId: user.id,
-  type: 'savings',
-  balance: 0,
-  currency: 'USD'
-};
-  db.users.push(user);
-  db.accounts.push(checkingAccount, savingsAccount);
-  db.save();
-
-  const res: AuthResponse = { token: tokenFor(user), user: publicUser(user) };
-  return ok(res, 201);
 }
 
 // ---------------------------------------------------------------------------
@@ -314,18 +245,10 @@ function money(n: number): number {
   return Math.round(n * 100) / 100;
 }
 
-function tokenFor(user: User): string {
-  return `mock-token.${user.id}`;
-}
-
 function currentUser(req: HttpRequest<unknown>, db: MockDb): UserRecord | undefined {
   const header = req.headers.get('Authorization') ?? '';
   const match = header.match(/^Bearer mock-token\.(.+)$/);
   return match ? db.users.find(u => u.id === match[1]) : undefined;
-}
-
-function publicUser(u: UserRecord): User {
-  return { id: u.id, name: u.name, email: u.email, createdAt: u.createdAt };
 }
 
 function asRecord(body: unknown): Record<string, unknown> {

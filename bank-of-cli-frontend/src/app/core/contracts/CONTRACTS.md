@@ -1,7 +1,8 @@
 # Bank of CLI: API Contracts
 
-This is the agreement between the frontend and the future backend. The mock backend
-(`core/interceptors/mock-backend.interceptor.ts`) follows it exactly, and the real backend
+This is the agreement between the frontend and the backend. The mock backend
+(`core/interceptors/mock-backend.interceptor.ts`) follows it exactly for the routes it still
+answers (everything except `/api/auth/*`, which goes to the real backend), and the real backend
 must return the same shapes. **If you need a field changed, change it here first, then in
 `core/models/`, then in the mock.**
 
@@ -32,6 +33,7 @@ The Spring backend serves every endpoint under `/api` and authenticates with a J
 | `GET /api/accounts/me`, `GET /api/accounts` | not yet |
 | `GET /api/accounts/{accountId}/transactions` | not yet |
 | deposit, withdraw, transfer | not yet |
+| DELETE /api/users/me | done |
 
 `GET /api/accounts` (all of the user's accounts) is called by `AccountService.loadMyAccounts()`
 but has no section below yet.
@@ -114,6 +116,7 @@ on the receiver's account.
 | `ACCOUNT_NOT_FOUND` | 404 | Account id does not exist |
 | `NOT_FOUND` | 404 | Unknown endpoint |
 | `EMAIL_TAKEN` | 409 | Register with an email already in use |
+| BALANCE_NOT_ZERO | 409 | Delete your profile while an account still holds money |
 | `INSUFFICIENT_FUNDS` | 422 | Withdraw or transfer more than the balance |
 | `NETWORK_ERROR` | 0 | Server unreachable (created by the frontend, never sent by the server) |
 | `UNKNOWN` | 500 | Anything else |
@@ -152,8 +155,8 @@ Request
 200 OK
 ```json
 {
-  "token": "mock-token.u1",
-  "user": { "id": "u1", "name": "Demo User", "email": "user@example.com", "createdAt": "2026-01-05T15:00:00.000Z" }
+  "token": "eyJhbGciOiJIUzI1NiJ9...",
+  "user": { "id": "3f6c1a2e-8b4d-4e1f-9a7c-2d5e8f0b1c34", "name": "Demo User", "email": "user@example.com", "createdAt": "2026-01-05T15:00:00.000Z" }
 }
 ```
 Errors: `400 VALIDATION_ERROR` (empty field), `401 INVALID_CREDENTIALS`
@@ -162,7 +165,7 @@ Errors: `400 VALIDATION_ERROR` (empty field), `401 INVALID_CREDENTIALS`
 ```
 
 ### POST `/api/auth/register`
-Creates the user **and** a checking account with a $0 balance, then logs them in.
+Creates the user, then logs them in. No accounts are created; the user opens them later.
 
 Request
 ```json
@@ -178,6 +181,23 @@ Errors: `400 VALIDATION_ERROR`, `409 EMAIL_TAKEN`
 ### POST `/api/auth/logout` 🔒
 No body. `204 No Content`.
 
+### DELETE `/api/users/me` 🔒
+Permanently deletes the logged-in user (the token's owner) **and** all of their accounts and
+transaction history. All or nothing. Afterwards the old token gives `401` and the email can be
+registered again. The user re-enters their password to confirm. **Every account must be at $0
+first**, so no money disappears; the user withdraws or transfers it out beforehand.
+
+Request
+```json
+{ "password": "password" }
+```
+`204 No Content`.
+
+Errors:
+- `400 VALIDATION_ERROR` (`field: "password"`): `"Password is required."` or `"Incorrect password."`
+  (deliberately not 401, so the client doesn't treat a typo as an expired session)
+- `409 BALANCE_NOT_ZERO` when any account still holds money (checked after the password). Nothing is deleted.
+- `401 UNAUTHORIZED`
 ### GET `/api/accounts/me` 🔒
 200 OK: an **Account**.
 
@@ -242,6 +262,10 @@ Errors:
 ## Mock test accounts
 
 From `src/assets/mock-data/`. Changes are kept in sessionStorage until the tab closes.
+
+> **These logins no longer work.** Login and register now go to the real backend, so register a
+> user there instead. The mock's account routes only accept the old mock tokens, so they answer
+> `401 UNAUTHORIZED` to a real token until each route is connected to the backend.
 
 | Email | Password | Account | Starting balance | Good for testing |
 |---|---|---|---|---|

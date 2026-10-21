@@ -3,11 +3,15 @@ package com.solo_leveling.bank_of_cli_backend.controller;
 import com.solo_leveling.bank_of_cli_backend.dto.request.LoginRequest;
 import com.solo_leveling.bank_of_cli_backend.dto.request.RegisterRequest;
 import com.solo_leveling.bank_of_cli_backend.dto.response.AuthResponse;
+import com.solo_leveling.bank_of_cli_backend.dto.response.UserResponse;
 import com.solo_leveling.bank_of_cli_backend.service.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.security.Principal;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/auth")
@@ -16,6 +20,11 @@ public class AuthController {
 
     public AuthController(AuthService authService) {
         this.authService = authService;
+    }
+
+    @GetMapping("/me")
+    ResponseEntity<UserResponse> profile(Principal principal) {
+        return ResponseEntity.ok(authService.getProfile(UUID.fromString(principal.getName())));
     }
 
     @PostMapping("/register")
