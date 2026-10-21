@@ -1,6 +1,8 @@
 package com.solo_leveling.bank_of_cli_backend.controller;
 
+import com.solo_leveling.bank_of_cli_backend.dto.request.WireRequest;
 import com.solo_leveling.bank_of_cli_backend.service.WireService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,10 +23,8 @@ public class WireController {
         this.wireService = wireService;
     }
 
-    @PostMapping("/{fromAccountId}/{toAccountId}/{amount}")
-    public ResponseEntity<Void> wireTransfer(@PathVariable String fromAccountId,
-                                             @PathVariable String toAccountId,
-                                             @PathVariable BigDecimal amount,
+    @PostMapping
+    public ResponseEntity<Void> wireTransfer(@Valid @RequestBody WireRequest request,
                                              Authentication authentication) {
 
 
@@ -34,18 +34,7 @@ public class WireController {
         String userId = authentication.getName();
 
 
-        if (fromAccountId.isBlank() || toAccountId.isBlank()) {
-            throw new IllegalArgumentException("Both account ids are required.");
-        }
-        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Amount must be greater than zero.");
-        }
-        if (amount.scale() > 2) {
-            throw new IllegalArgumentException("Amount cannot have more than 2 decimal places.");
-        }
-
-
-        wireService.executeWireTransfer(userId, fromAccountId, toAccountId, amount);
+        wireService.executeWireTransfer(userId,request);
         return ResponseEntity.ok().build();
     }
 
