@@ -29,14 +29,11 @@ The Spring backend serves every endpoint under `/api` and authenticates with a J
 | Endpoint | Backend |
 |---|---|
 | `POST /api/auth/register`, `POST /api/auth/login`, `POST /api/auth/logout` | done |
+| `GET /api/accounts`, `GET /api/accounts/me`, `POST /api/accounts` | done |
 | `PATCH /api/accounts/{accountId}` | done |
-| `GET /api/accounts/me`, `GET /api/accounts` | not yet |
 | `GET /api/accounts/{accountId}/transactions` | not yet |
-| deposit, withdraw, transfer | not yet |
+| deposit, withdraw, transfer | done |
 | DELETE /api/users/me | done |
-
-`GET /api/accounts` (all of the user's accounts) is called by `AccountService.loadMyAccounts()`
-but has no section below yet.
 
 ---
 
@@ -198,10 +195,29 @@ Errors:
   (deliberately not 401, so the client doesn't treat a typo as an expired session)
 - `409 BALANCE_NOT_ZERO` when any account still holds money (checked after the password). Nothing is deleted.
 - `401 UNAUTHORIZED`
-### GET `/api/accounts/me` 🔒
-200 OK: an **Account**.
+### GET `/api/accounts` 🔒
+200 OK: an array of the user's **Account**s, oldest first. `[]` before they open one.
 
-Errors: `401 UNAUTHORIZED`, `404 ACCOUNT_NOT_FOUND`
+Errors: `401 UNAUTHORIZED`
+
+### GET `/api/accounts/me` 🔒
+200 OK: the user's main **Account**: their first checking account, or their first account if they
+have no checking account.
+
+Errors: `401 UNAUTHORIZED`, `404 ACCOUNT_NOT_FOUND` (`"No account found for this user."`) before they open one
+
+### POST `/api/accounts` 🔒
+Opens a new account for the logged-in user with a $0 balance. The server picks the account number.
+
+Request
+```json
+{ "type": "savings", "nickname": "Rainy day fund" }
+```
+`nickname` is optional (blank means none). The currency is always `USD`.
+
+201 Created: the new **Account**.
+
+Errors: `400 VALIDATION_ERROR` (`field: "type"` or `"nickname"`), `401 UNAUTHORIZED`
 
 ### GET `/api/accounts/{accountId}/transactions?limit=10` 🔒
 `limit` is optional (default 10, max 100).
