@@ -18,6 +18,7 @@ import java.util.Currency;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.List;
 
 @Service
 public class AccountServiceImpl implements AccountService {
@@ -29,6 +30,25 @@ public class AccountServiceImpl implements AccountService {
         this.accounts = accounts;
         this.bankUsers = bankUsers;
         this.jdbcTemplate = jdbcTemplate;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public AccountResponse getMyAccount(UUID ownerId) {
+        List<AccountResponse> mine = getMyAccounts(ownerId);
+        return mine.stream()
+                .filter(account -> "checking".equals(account.type()))
+                .findFirst()
+                .or(() -> mine.stream().findFirst())
+                .orElseThrow(AccountNotFoundException::forCurrentUser);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<AccountResponse> getMyAccounts(UUID ownerId) {
+        return accounts.findAllByUser_IdOrderByCreatedAtAscIdAsc(ownerId).stream()
+                .map(AccountResponse::from)
+                .toList();
     }
 
     @Override

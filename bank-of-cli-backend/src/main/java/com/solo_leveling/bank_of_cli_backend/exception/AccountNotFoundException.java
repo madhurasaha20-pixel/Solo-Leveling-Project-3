@@ -8,4 +8,7 @@ public class AccountNotFoundException extends RuntimeException {
     public AccountNotFoundException(String accountId) {
         super("Account " + accountId + " does not exist.");
     }
+
+    public AccountNotFoundException() { super("No account found for this user."); }
+    public static AccountNotFoundException forCurrentUser() { return new AccountNotFoundException(); }
 }
