@@ -42,6 +42,16 @@ public class GlobalExceptionHandler {
         return build(HttpStatus.UNAUTHORIZED, "INVALID_CREDENTIALS", e.getMessage(), null);
     }
 
+    @ExceptionHandler(IncorrectPasswordException.class)
+    ResponseEntity<ApiError> handleIncorrectPassword(IncorrectPasswordException e) {
+        return build(HttpStatus.BAD_REQUEST, "VALIDATION_ERROR", e.getMessage(), "password");
+    }
+
+    @ExceptionHandler(BalanceNotZeroException.class)
+    ResponseEntity<ApiError> handleBalanceNotZero(BalanceNotZeroException e) {
+        return build(HttpStatus.CONFLICT, "BALANCE_NOT_ZERO", e.getMessage(), null);
+    }
+
     @ExceptionHandler(NoResourceFoundException.class)
     ResponseEntity<ApiError> handleNotFound(NoResourceFoundException e) {
         return build(HttpStatus.NOT_FOUND, "NOT_FOUND", "Resource not found.", null);

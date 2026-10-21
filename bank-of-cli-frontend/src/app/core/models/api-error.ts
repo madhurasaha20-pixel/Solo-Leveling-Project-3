@@ -6,6 +6,7 @@ export type ApiErrorCode =
   | 'ACCOUNT_NOT_FOUND'   // 404
   | 'NOT_FOUND'           // 404
   | 'EMAIL_TAKEN'         // 409
+  | 'BALANCE_NOT_ZERO'    // 409
   | 'INSUFFICIENT_FUNDS'  // 422
   | 'NETWORK_ERROR'       // 0 (server unreachable)
   | 'UNKNOWN';            // 500 or anything unexpected

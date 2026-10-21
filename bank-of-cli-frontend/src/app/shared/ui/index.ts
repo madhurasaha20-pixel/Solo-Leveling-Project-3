@@ -9,3 +9,4 @@ export * from './alert.component';
 export * from './tabs.component';
 export * from './skeleton.component';
 export * from './account-menu.component';
+export * from './delete-account-dialog.component';
