@@ -1,12 +1,14 @@
+import { CurrencyPipe } from '@angular/common';
 import { Component, input } from '@angular/core';
-import { TransactionHistoryComponent } from '../transaction-history.component';
 
 @Component({
-  imports: [],
   selector: 'transaction-summary',
-  //styleUrl: './transaction-summary.css',
+  imports: [CurrencyPipe],
   templateUrl: './transaction-summary.html',
+  // styleUrls: ['./transaction-history.component.css']
 })
 export class TransactionSummary {
   readonly numberOfTransactions = input<number>(0);
+  readonly totalIn = input<number>(0);
+  readonly totalOut = input<number>(0);
 }
