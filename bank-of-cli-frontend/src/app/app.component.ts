@@ -25,7 +25,6 @@ export class AppComponent {
   protected readonly auth = inject(AuthService);
   protected readonly accounts = inject(AccountService);
   protected readonly router = inject(Router);
-  protected readonly signedOut = signal(false);
   protected readonly signOutMessage = signal<string | null>(null);
   protected readonly links = [
     { path: '/dashboard', label: 'Dashboard' },
@@ -44,7 +43,7 @@ export class AppComponent {
 
   protected signOut(): void {
     this.auth.logout();
-    this.signedOut.set(true);
+    this.signOutMessage.set('You’re signed out.');
     void this.router.navigateByUrl('/login');
   }
 

@@ -35,8 +35,8 @@ export const mockBackendInterceptor: HttpInterceptorFn = (req, next) => {
     return next(req);
   }
   const path = req.url.slice(environment.apiBase.length).split('?')[0];
-  // auth is served by the real backend; only the account routes are still mocked
-  if (path.startsWith('/auth/')) {
+  // auth and user (delete account) are served by the real backend; only the account routes are still mocked
+  if (path.startsWith('/auth/') || path.startsWith('/users/')) {
     return next(req);
   }
   const db = inject(MockDb);

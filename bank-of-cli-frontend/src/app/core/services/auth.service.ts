@@ -4,7 +4,6 @@ import { BehaviorSubject, Observable, catchError, map, tap, throwError } from 'r
 import { AuthResponse, DeleteUserRequest, LoginRequest, RegisterRequest, User } from '../models';
 
 import { environment } from '../../../environments/environment';
-import { AuthResponse, LoginRequest, RegisterRequest, User } from '../models';
 import { toApiError } from './api-error.util';
 
 const SESSION_KEY = 'boc.session';
@@ -80,6 +79,11 @@ export class AuthService {
     this.session = res;
     try { sessionStorage.setItem(SESSION_KEY, JSON.stringify(res)); } catch { /* ignore */ }
     this.userSubject.next(res.user);
+  }
+  private clearSession(): void {
+    this.session = null;
+    try { sessionStorage.removeItem(SESSION_KEY); } catch { /* ignore */ }
+    this.userSubject.next(null);
   }
 
   private loadSession(): AuthResponse | null {
