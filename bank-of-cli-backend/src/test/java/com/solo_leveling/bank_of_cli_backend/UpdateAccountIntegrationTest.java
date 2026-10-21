@@ -33,8 +33,9 @@ class UpdateAccountIntegrationTest extends ApiTestSupport {
 
     @BeforeEach
     void setUp() throws Exception {
-        createUserWithAccount("Ada", "ada@example.com", "ACC-1001", "checking");
-        createUserWithAccount("Grace", "grace@example.com", "ACC-1002", "checking");
+        // ACC-91xx: test-only numbers, clear of the seed accounts in data.sql (ACC-1001 and up)
+        createUserWithAccount("Ada", "ada@example.com", "ACC-9101", "checking");
+        createUserWithAccount("Grace", "grace@example.com", "ACC-9102", "checking");
     }
 
     // registers through the real endpoint to get a token, then gives the user an account
@@ -59,28 +60,28 @@ class UpdateAccountIntegrationTest extends ApiTestSupport {
 
     @Test
     void updatesNicknameAndType() throws Exception {
-        update("ada@example.com", "ACC-1001", """
+        update("ada@example.com", "ACC-9101", """
                 {"nickname": "  Rainy day fund  ", "type": "savings"}
                 """)
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value("ACC-1001"))
+                .andExpect(jsonPath("$.id").value("ACC-9101"))
                 .andExpect(jsonPath("$.nickname").value("Rainy day fund"))
                 .andExpect(jsonPath("$.type").value("savings"))
                 .andExpect(jsonPath("$.balance").value(25.00))
                 .andExpect(jsonPath("$.currency").value("USD"));
 
-        Account saved = accounts.findById("ACC-1001").orElseThrow();
+        Account saved = accounts.findById("ACC-9101").orElseThrow();
         assertThat(saved.getNickname()).isEqualTo("Rainy day fund");
         assertThat(saved.getAccountType()).isEqualTo("savings");
     }
 
     @Test
     void leavesFieldsThatAreLeftOutUnchanged() throws Exception {
-        update("ada@example.com", "ACC-1001", """
+        update("ada@example.com", "ACC-9101", """
                 {"nickname": "Bills"}
                 """).andExpect(status().isOk());
 
-        update("ada@example.com", "ACC-1001", """
+        update("ada@example.com", "ACC-9101", """
                 {"type": "savings"}
                 """)
                 .andExpect(status().isOk())
@@ -90,22 +91,22 @@ class UpdateAccountIntegrationTest extends ApiTestSupport {
 
     @Test
     void blankNicknameClearsIt() throws Exception {
-        update("ada@example.com", "ACC-1001", """
+        update("ada@example.com", "ACC-9101", """
                 {"nickname": "Bills"}
                 """).andExpect(status().isOk());
 
-        update("ada@example.com", "ACC-1001", """
+        update("ada@example.com", "ACC-9101", """
                 {"nickname": "   "}
                 """)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.nickname").doesNotExist());
 
-        assertThat(accounts.findById("ACC-1001").orElseThrow().getNickname()).isNull();
+        assertThat(accounts.findById("ACC-9101").orElseThrow().getNickname()).isNull();
     }
 
     @Test
     void rejectsNicknameOver30Characters() throws Exception {
-        update("ada@example.com", "ACC-1001", """
+        update("ada@example.com", "ACC-9101", """
                 {"nickname": "%s"}
                 """.formatted("a".repeat(31)))
                 .andExpect(status().isBadRequest())
@@ -116,26 +117,26 @@ class UpdateAccountIntegrationTest extends ApiTestSupport {
 
     @Test
     void rejectsUnknownType() throws Exception {
-        update("ada@example.com", "ACC-1001", """
+        update("ada@example.com", "ACC-9101", """
                 {"type": "crypto"}
                 """)
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
                 .andExpect(jsonPath("$.field").value("type"));
 
-        assertThat(accounts.findById("ACC-1001").orElseThrow().getAccountType()).isEqualTo("checking");
+        assertThat(accounts.findById("ACC-9101").orElseThrow().getAccountType()).isEqualTo("checking");
     }
 
     @Test
     void rejectsSomeoneElsesAccount() throws Exception {
-        update("ada@example.com", "ACC-1002", """
+        update("ada@example.com", "ACC-9102", """
                 {"nickname": "Mine now"}
                 """)
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.status").value(403))
                 .andExpect(jsonPath("$.code").value("FORBIDDEN"));
 
-        assertThat(accounts.findById("ACC-1002").orElseThrow().getNickname()).isNull();
+        assertThat(accounts.findById("ACC-9102").orElseThrow().getNickname()).isNull();
     }
 
     @Test
