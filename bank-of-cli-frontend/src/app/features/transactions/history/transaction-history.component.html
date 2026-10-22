@@ -1,21 +1,27 @@
 <section>
-  <h1>Transaction History</h1>
-  <transaction-summary [numberOfTransactions]="transactions.length"></transaction-summary>
-  <ul>
-    @for (t of transactions; track t.id) {
-      <li>
-        <app-transaction-item
-          [origin]="t.description ?? ''"
-          [amount]="t.amount"
-          [date]="t.date"
-          [type]="t.type">
-        </app-transaction-item>
-      </li>
-    } @empty {
-      <li class="py-3 text-ink-muted">No transactions found.</li>
+    <h1>Transaction History</h1>
+    <transaction-summary
+            [numberOfTransactions]="transactions().length"
+            [totalIn]="totalIn()"
+            [totalOut]="totalOut()" />
+
+    @if (loading()) {
+        <p class="py-3 text-ink-muted">Loading transactions…</p>
+    } @else if (error(); as message) {
+        <p class="py-3" role="alert">{{ message }}</p>
+    } @else {
+        <ul>
+            @for (t of transactions(); track t.id) {
+                <li>
+                    <app-transaction-item
+                            [origin]="label(t)"
+                            [amount]="t.amount"
+                            [date]="t.date"
+                            [type]="t.type" />
+                </li>
+            } @empty {
+                <li class="py-3 text-ink-muted">No transactions found.</li>
+            }
+        </ul>
     }
-  </ul>
-
-  <p *ngIf="transactions.length === 0">No transactions found.</p>
 </section>
-
