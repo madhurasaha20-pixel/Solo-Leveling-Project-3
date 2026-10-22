@@ -3,15 +3,15 @@ package com.solo_leveling.bank_of_cli_backend.service;
 import com.solo_leveling.bank_of_cli_backend.dto.request.CreateAccountRequest;
 import com.solo_leveling.bank_of_cli_backend.dto.request.UpdateAccountRequest;
 import com.solo_leveling.bank_of_cli_backend.dto.response.AccountResponse;
-import com.solo_leveling.bank_of_cli_backend.dto.response.CreateAccountResponse;
 
+import java.util.List;
 import java.util.UUID;
 
 public interface AccountService {
-    AccountResponse updateAccount(String accountId, UUID ownerId, UpdateAccountRequest request);
+    AccountResponse getMyAccount(UUID ownerId);
+    List<AccountResponse> getMyAccounts(UUID ownerId);
 
-    CreateAccountResponse addNewAccount(
-            CreateAccountRequest request,
-            UUID ownerId
-    );
+    AccountResponse createAccount(UUID ownerId, CreateAccountRequest request);
+
+    AccountResponse updateAccount(String accountId, UUID ownerId, UpdateAccountRequest request);
 }
