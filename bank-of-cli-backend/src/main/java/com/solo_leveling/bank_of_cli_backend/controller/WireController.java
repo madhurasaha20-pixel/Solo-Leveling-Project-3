@@ -1,43 +1,40 @@
 package com.solo_leveling.bank_of_cli_backend.controller;
 
 import com.solo_leveling.bank_of_cli_backend.dto.request.WireRequest;
-import com.solo_leveling.bank_of_cli_backend.service.WireService;
+import com.solo_leveling.bank_of_cli_backend.service.TransferProcessor;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/wire")
 public class WireController {
 
-    private final WireService wireService;
+    private final TransferProcessor processor;
 
-    @Autowired
-    public WireController(WireService wireService) {
-        this.wireService = wireService;
+    public WireController(@Qualifier("wireTransferProcessor") TransferProcessor processor) {
+        this.processor = processor;
     }
 
     @PostMapping
     public ResponseEntity<Void> wireTransfer(@Valid @RequestBody WireRequest request,
                                              Authentication authentication) {
 
-
         if (authentication == null || !authentication.isAuthenticated()) {
             throw new AccessDeniedException("Authentication required.");
         }
-        String userId = authentication.getName();
+        UUID ownerId = UUID.fromString(authentication.getName());
 
-
-        wireService.executeWireTransfer(userId,request);
+        processor.transfer(request.fromAccountId(), ownerId,
+                request.toAccountId(), request.amount());
         return ResponseEntity.ok().build();
     }
-
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<String> badRequest(IllegalArgumentException e) {
