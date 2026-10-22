@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.util.UUID;
+import java.util.List;
 
 @RestController
 @RequestMapping("/accounts")
@@ -38,5 +39,15 @@ public class AccountController {
                 request,
                 UUID.fromString(principal.getName())
         );
+    }
+
+    @GetMapping("/me")
+    ResponseEntity<AccountResponse> myAccount(Principal principal) {
+        return ResponseEntity.ok(accountService.getMyAccount(UUID.fromString(principal.getName())));
+    }
+
+    @GetMapping
+    ResponseEntity<List<AccountResponse>> myAccounts(Principal principal) {
+        return ResponseEntity.ok(accountService.getMyAccounts(UUID.fromString(principal.getName())));
     }
 }

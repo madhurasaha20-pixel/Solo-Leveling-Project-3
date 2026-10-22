@@ -22,4 +22,6 @@ public interface AccountRepository extends JpaRepository<Account, String> {
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("delete from Account a where a.user.id = :userId")
     int deleteAllByOwner(@Param("userId") UUID userId);
+
+    List<Account> findAllByUser_IdOrderByCreatedAtAscIdAsc(UUID userId);
 }
