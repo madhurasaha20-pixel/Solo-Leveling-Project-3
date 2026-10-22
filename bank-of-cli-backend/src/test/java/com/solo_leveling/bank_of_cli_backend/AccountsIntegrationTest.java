@@ -147,7 +147,7 @@ class AccountsIntegrationTest extends ApiTestSupport {
                 .andExpect(jsonPath("$.field").value("nickname"));
 
         BankUser ada = users.findByEmail("ada@example.com").orElseThrow();
-        assertThat(accounts.findAllByOwner(ada.getId())).isEmpty();
+        assertThat(accounts.findAllByUser_IdOrderByCreatedAtAscIdAsc(ada.getId())).isEmpty();
     }
 
     // ---- GET /accounts ----

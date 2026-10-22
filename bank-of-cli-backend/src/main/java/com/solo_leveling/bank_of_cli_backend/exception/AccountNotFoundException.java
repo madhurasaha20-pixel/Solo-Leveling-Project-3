@@ -9,12 +9,6 @@ public class AccountNotFoundException extends RuntimeException {
         super("Account " + accountId + " does not exist.");
     }
 
-    private AccountNotFoundException() {
-        super("No account found for this user.");
-    }
-
-    /** GET /accounts/me when the user hasn't opened an account yet. */
-    public static AccountNotFoundException noAccountForUser() {
-        return new AccountNotFoundException();
-    }
+    public AccountNotFoundException() { super("No account found for this user."); }
+    public static AccountNotFoundException forCurrentUser() { return new AccountNotFoundException(); }
 }

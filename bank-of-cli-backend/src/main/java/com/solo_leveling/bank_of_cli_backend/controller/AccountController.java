@@ -23,16 +23,6 @@ public class AccountController {
         this.accountService = accountService;
     }
 
-    @GetMapping
-    ResponseEntity<List<AccountResponse>> listAccounts(Principal principal) {
-        return ResponseEntity.ok(accountService.listAccounts(ownerId(principal)));
-    }
-
-    @GetMapping("/me")
-    ResponseEntity<AccountResponse> mainAccount(Principal principal) {
-        return ResponseEntity.ok(accountService.mainAccount(ownerId(principal)));
-    }
-
     @PostMapping
     ResponseEntity<AccountResponse> createAccount(@Valid @RequestBody CreateAccountRequest request,
                                                   Principal principal) {
@@ -45,6 +35,16 @@ public class AccountController {
                                                   @Valid @RequestBody UpdateAccountRequest request,
                                                   Principal principal) {
         return ResponseEntity.ok(accountService.updateAccount(accountId, ownerId(principal), request));
+    }
+
+    @GetMapping("/me")
+    ResponseEntity<AccountResponse> myAccount(Principal principal) {
+        return ResponseEntity.ok(accountService.getMyAccount(UUID.fromString(principal.getName())));
+    }
+
+    @GetMapping
+    ResponseEntity<List<AccountResponse>> myAccounts(Principal principal) {
+        return ResponseEntity.ok(accountService.getMyAccounts(UUID.fromString(principal.getName())));
     }
 
     private static UUID ownerId(Principal principal) {

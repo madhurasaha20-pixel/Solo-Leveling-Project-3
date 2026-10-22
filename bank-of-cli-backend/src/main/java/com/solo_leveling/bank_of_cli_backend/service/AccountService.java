@@ -8,11 +8,8 @@ import java.util.List;
 import java.util.UUID;
 
 public interface AccountService {
-    /** All of the user's accounts, oldest first. Empty when they haven't opened one yet. */
-    List<AccountResponse> listAccounts(UUID ownerId);
-
-    /** The user's main account: their first checking account, else their first account. */
-    AccountResponse mainAccount(UUID ownerId);
+    AccountResponse getMyAccount(UUID ownerId);
+    List<AccountResponse> getMyAccounts(UUID ownerId);
 
     AccountResponse createAccount(UUID ownerId, CreateAccountRequest request);
 

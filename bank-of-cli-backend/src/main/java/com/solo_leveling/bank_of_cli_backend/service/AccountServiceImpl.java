@@ -17,8 +17,6 @@ import java.util.UUID;
 
 @Service
 public class AccountServiceImpl implements AccountService {
-    static final String CHECKING = "checking";
-
     private final AccountRepository accounts;
     private final BankUserRepository users;
     private final AccountNumberGenerator accountNumbers;
@@ -29,26 +27,6 @@ public class AccountServiceImpl implements AccountService {
         this.accounts = accounts;
         this.users = users;
         this.accountNumbers = accountNumbers;
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<AccountResponse> listAccounts(UUID ownerId) {
-        return accounts.findAllByOwner(ownerId).stream()
-                .map(AccountResponse::from)
-                .toList();
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public AccountResponse mainAccount(UUID ownerId) {
-        List<Account> owned = accounts.findAllByOwner(ownerId);
-        return owned.stream()
-                .filter(account -> CHECKING.equals(account.getAccountType()))
-                .findFirst()
-                .or(() -> owned.stream().findFirst())
-                .map(AccountResponse::from)
-                .orElseThrow(AccountNotFoundException::noAccountForUser);
     }
 
     @Override
@@ -66,6 +44,25 @@ public class AccountServiceImpl implements AccountService {
             account.setNickname(request.nickname().trim());
         }
         return AccountResponse.from(accounts.saveAndFlush(account));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public AccountResponse getMyAccount(UUID ownerId) {
+        List<AccountResponse> mine = getMyAccounts(ownerId);
+        return mine.stream()
+                .filter(account -> "checking".equals(account.type()))
+                .findFirst()
+                .or(() -> mine.stream().findFirst())
+                .orElseThrow(AccountNotFoundException::forCurrentUser);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<AccountResponse> getMyAccounts(UUID ownerId) {
+        return accounts.findAllByUser_IdOrderByCreatedAtAscIdAsc(ownerId).stream()
+                .map(AccountResponse::from)
+                .toList();
     }
 
     @Override
