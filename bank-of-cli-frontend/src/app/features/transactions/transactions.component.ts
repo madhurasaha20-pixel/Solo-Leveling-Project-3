@@ -13,7 +13,7 @@ import { Account } from '../../core/models';
 import { AccountService } from '../../core/services/account.service';
 import { ToastComponent } from '../../shared/toast/toast.component';
 import { TransactionService } from './transaction.service';
-import { WireService } from './wire.service';
+import { WireResponse, WireService } from './wire.service';
 import { TransactionResponse } from '../../core/models/transaction';
 
 type TransactionAction = 'deposit' | 'withdraw' | 'transfer' | 'wire';
@@ -195,7 +195,7 @@ export class TransactionsComponent {
         const destinationAccountId = this.form.value.toAccountId ?? '';
         const recipientEmail = this.form.controls.toEmail.value?.trim() ?? ''; // WIRE
 
-        let call$: Observable<TransactionResponse>;
+        let call$: Observable<TransactionResponse | WireResponse>;
 
         if (action === 'deposit') {
             call$ = this.transactionsService.deposit(accountId, {
@@ -221,7 +221,7 @@ export class TransactionsComponent {
             }); // WIRE
         }
 
-        let transactionResponse: TransactionResponse | null = null;
+        let transactionResponse: TransactionResponse | WireResponse | null = null;
 
         this.loading.set(true);
         const startedAt = Date.now();
@@ -242,15 +242,22 @@ export class TransactionsComponent {
                                     ? 'Withdrawal'
                                     : action === 'transfer'
                                         ? 'Transfer'
-                                        : 'Deposit';
+                                        : action === 'wire'
+                                            ? 'Wire'
+                                            : 'Deposit';
 
-                            const balance = new Intl.NumberFormat('en-US', {
-                                style: 'currency',
-                                currency: 'USD',
-                            }).format(transactionResponse.newBalance);
+                            const current = this.currentAccount();
+                            const balance = current
+                                ? new Intl.NumberFormat('en-US', {
+                                    style: 'currency',
+                                    currency: 'USD',
+                                }).format(current.balance)
+                                : null;
 
                             this.toastMessage.set(
-                                `${operation} succeeded. New balance: ${balance}`,
+                                balance
+                                    ? `${operation} succeeded. New balance: ${balance}`
+                                    : `${operation} succeeded.`,
                             );
                             this.toastType.set('success');
                         }
