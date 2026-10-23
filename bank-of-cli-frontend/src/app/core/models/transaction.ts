@@ -51,3 +51,17 @@ export interface TransactionResponse {
 export function isCredit(t: Transaction): boolean {
   return t.type === 'deposit' || t.type === 'transfer-in';
 }
+
+export interface WireRequest {
+  fromAccountId: string;
+  toAccountId: string;
+  amount: number;
+}
+
+export interface WireResponse {
+  transactionId: string;
+  fromAccountId: string;
+  toAccountId: string;
+  amount: number;
+  createdAt: string;
+}
