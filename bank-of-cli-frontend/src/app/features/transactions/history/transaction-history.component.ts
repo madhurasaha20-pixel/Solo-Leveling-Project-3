@@ -30,9 +30,8 @@ export class TransactionHistoryComponent {
         () => this.transactions().filter(isCredit).reduce((sum, t) => sum + t.amount, 0)
     );
     protected readonly totalOut = computed(
-        this.transactions().filter(t => !isCredit(t)).reduce((sum, t) => sum + t.amount, 0)
+        () => this.transactions().filter(t => !isCredit(t)).reduce((sum, t) => sum + t.amount, 0)
     );
-
     constructor() {
         if (!this.accounts.account) {
             this.accounts.loadMyAccount().pipe(takeUntilDestroyed()).subscribe({
