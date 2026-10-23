@@ -7,6 +7,7 @@ import com.solo_leveling.bank_of_cli_backend.entity.Account;
 import com.solo_leveling.bank_of_cli_backend.entity.Transaction;
 import com.solo_leveling.bank_of_cli_backend.exception.AccountForbiddenException;
 import com.solo_leveling.bank_of_cli_backend.exception.AccountNotFoundException;
+import com.solo_leveling.bank_of_cli_backend.exception.InsufficientFundsException;
 import com.solo_leveling.bank_of_cli_backend.repository.AccountRepository;
 import com.solo_leveling.bank_of_cli_backend.repository.TransactionRepository;
 import com.solo_leveling.bank_of_cli_backend.dto.response.TransactionHistoryResponse;
@@ -98,7 +99,7 @@ public class TransactionServiceImpl implements TransactionService {
         }
 
         if (account.getBalance().compareTo(request.amount()) < 0) {
-            throw new IllegalArgumentException("Insufficient funds");
+            throw new InsufficientFundsException();
         }
 
         account.setBalance(account.getBalance().subtract(request.amount()));
