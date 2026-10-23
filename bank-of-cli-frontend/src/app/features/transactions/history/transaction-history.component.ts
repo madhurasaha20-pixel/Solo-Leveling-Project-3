@@ -8,7 +8,6 @@ import { TransactionItemComponent } from '../../../shared/components/transaction
 import { TransactionService } from '../transaction.service';
 import { TransactionSummary } from './transaction-summary/transaction-summary';
 
-
 @Component({
     selector: 'app-transaction-history',
     standalone: true,

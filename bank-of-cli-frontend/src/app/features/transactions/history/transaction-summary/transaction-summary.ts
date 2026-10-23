@@ -5,6 +5,7 @@ import { Component, input } from '@angular/core';
   selector: 'transaction-summary',
   imports: [CurrencyPipe],
   templateUrl: './transaction-summary.html',
+  // styleUrls: ['./transaction-history.component.css']
 })
 export class TransactionSummary {
   readonly numberOfTransactions = input<number>(0);

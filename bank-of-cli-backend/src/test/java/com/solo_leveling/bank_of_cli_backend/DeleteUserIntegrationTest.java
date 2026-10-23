@@ -40,9 +40,10 @@ class DeleteUserIntegrationTest extends ApiTestSupport {
 
     @BeforeEach
     void setUp() throws Exception {
+        // ACC-91xx: test-only numbers, clear of the seed accounts in data.sql (ACC-1001 and up)
         // both start emptied out ($50 in, $50 out), so they are allowed to delete; history still exists
-        createUserWithEmptiedAccount("Ada", "ada@example.com", "ACC-1001");
-        createUserWithEmptiedAccount("Grace", "grace@example.com", "ACC-1002");
+        createUserWithEmptiedAccount("Ada", "ada@example.com", "ACC-9101");
+        createUserWithEmptiedAccount("Grace", "grace@example.com", "ACC-9102");
     }
 
     private void createUserWithEmptiedAccount(String name, String email, String accountId) throws Exception {
@@ -74,7 +75,7 @@ class DeleteUserIntegrationTest extends ApiTestSupport {
 
     private void giveAdaMoney(String balance, String currency) {
         BankUser ada = users.findByEmail("ada@example.com").orElseThrow();
-        addAccount(ada, "ACC-1003", balance, currency);
+        addAccount(ada, "ACC-9103", balance, currency);
     }
 
     private ResultActions deleteMe(String token, String json) throws Exception {
@@ -99,9 +100,9 @@ class DeleteUserIntegrationTest extends ApiTestSupport {
         assertThat(users.existsById(adaId)).isFalse();
         assertThat(credentials.existsById(adaId)).isFalse();
         assertThat(userRoles.findByUserId(adaId)).isEmpty();
-        assertThat(accounts.existsById("ACC-1001")).isFalse();
+        assertThat(accounts.existsById("ACC-9101")).isFalse();
         assertThat(transactions.findAll())
-                .noneMatch(t -> t.getAccount().getId().equals("ACC-1001"));
+                .noneMatch(t -> t.getAccount().getId().equals("ACC-9101"));
     }
 
     @Test
@@ -110,9 +111,9 @@ class DeleteUserIntegrationTest extends ApiTestSupport {
                 .andExpect(status().isNoContent());
 
         assertThat(users.findByEmail("grace@example.com")).isPresent();
-        assertThat(accounts.existsById("ACC-1002")).isTrue();
+        assertThat(accounts.existsById("ACC-9102")).isTrue();
         assertThat(transactions.findAll())
-                .anyMatch(t -> t.getAccount().getId().equals("ACC-1002"));
+                .anyMatch(t -> t.getAccount().getId().equals("ACC-9102"));
     }
 
     @Test
@@ -151,9 +152,9 @@ class DeleteUserIntegrationTest extends ApiTestSupport {
 
         // nothing was deleted, not even the emptied account or its history
         assertThat(users.findByEmail("ada@example.com")).isPresent();
-        assertThat(accounts.existsById("ACC-1001")).isTrue();
-        assertThat(accounts.existsById("ACC-1003")).isTrue();
-        assertThat(transactions.findAll()).anyMatch(t -> t.getAccount().getId().equals("ACC-1001"));
+        assertThat(accounts.existsById("ACC-9101")).isTrue();
+        assertThat(accounts.existsById("ACC-9103")).isTrue();
+        assertThat(transactions.findAll()).anyMatch(t -> t.getAccount().getId().equals("ACC-9101"));
     }
 
     @Test
@@ -187,7 +188,7 @@ class DeleteUserIntegrationTest extends ApiTestSupport {
                 .andExpect(jsonPath("$.field").value("password"));
 
         assertThat(users.findByEmail("ada@example.com")).isPresent();
-        assertThat(accounts.existsById("ACC-1001")).isTrue();
+        assertThat(accounts.existsById("ACC-9101")).isTrue();
     }
 
     @Test

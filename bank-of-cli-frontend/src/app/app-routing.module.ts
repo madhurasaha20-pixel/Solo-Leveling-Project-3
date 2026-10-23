@@ -5,6 +5,7 @@ import { AuthPageComponent } from './features/auth/auth-page.component';
 import { DashboardComponent } from './features/dashboard/dashboard.component';
 import { TransactionsComponent } from './features/transactions/transactions.component';
 import { TransactionHistoryComponent } from './features/transactions/history/transaction-history.component';
+import { ProfileComponent } from './features/profile/profile.component';
 
 const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'login' },
@@ -36,6 +37,12 @@ const routes: Routes = [
     canActivate: [authGuard],
     component: TransactionHistoryComponent,
     title: 'Transactions · Bank of CLI'
+  },
+  {
+    path: 'profile',
+    canActivate: [authGuard],
+    component: ProfileComponent,
+    title: 'Profile · Bank of CLI'
   },
   { path: '**', redirectTo: 'login' },
 ];
