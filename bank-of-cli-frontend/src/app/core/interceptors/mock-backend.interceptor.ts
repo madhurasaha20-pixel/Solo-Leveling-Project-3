@@ -169,7 +169,13 @@ function moveMoney(
     account.balance = money(account.balance + value);
     const tx = record(db, account, 'deposit', value, description ?? 'Deposit');
     db.save();
-    return ok<TransactionResponse>({ transaction: { ...tx }, account: { ...account } });
+    return ok<TransactionResponse>({
+      id: tx.id,
+      accountId: tx.accountId,
+      transactionType: tx.type.toUpperCase(),
+      amount: tx.amount,
+      createdAt: tx.date,
+    });
   }
 
   // ---- withdraw ----
@@ -180,7 +186,13 @@ function moveMoney(
     account.balance = money(account.balance - value);
     const tx = record(db, account, 'withdraw', value, description ?? 'Withdrawal');
     db.save();
-    return ok<TransactionResponse>({ transaction: { ...tx }, account: { ...account } });
+    return ok<TransactionResponse>({
+      id: tx.id,
+      accountId: tx.accountId,
+      transactionType: tx.type.toUpperCase(),
+      amount: tx.amount,
+      createdAt: tx.date,
+    });
   }
 
   // ---- transfer ----
@@ -204,7 +216,13 @@ function moveMoney(
   const out = record(db, account, 'transfer-out', value, description ?? `Transfer to ${target.id}`, target.id);
   record(db, target, 'transfer-in', value, description ?? `Transfer from ${account.id}`, account.id);
   db.save();
-  return ok<TransactionResponse>({ transaction: { ...out }, account: { ...account } });
+  return ok<TransactionResponse>({
+    id: out.id,
+    accountId: out.accountId,
+    transactionType: out.type.toUpperCase(),
+    amount: out.amount,
+    createdAt: out.date,
+  });
 }
 
 // ---------------------------------------------------------------------------
