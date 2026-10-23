@@ -5,6 +5,7 @@ import com.solo_leveling.bank_of_cli_backend.dto.response.TransactionResponse;
 import com.solo_leveling.bank_of_cli_backend.service.TransactionService;
 import com.solo_leveling.bank_of_cli_backend.dto.request.WithdrawRequest;
 import com.solo_leveling.bank_of_cli_backend.dto.request.TransferRequest;
+import com.solo_leveling.bank_of_cli_backend.dto.response.TransactionHistoryResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -12,9 +13,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.security.Principal;
 import java.util.UUID;
+import java.util.List;
 
 @RestController
 @RequestMapping("/accounts")
@@ -75,5 +79,14 @@ public class TransactionController {
         );
 
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{accountId}/transactions")
+    public ResponseEntity<List<TransactionHistoryResponse>> history(
+            @PathVariable String accountId,
+            @RequestParam(defaultValue = "10") int limit,
+            Principal principal
+    ) {
+        return ResponseEntity.ok(transactionService.getHistory(accountId, UUID.fromString(principal.getName()), limit));
     }
 }

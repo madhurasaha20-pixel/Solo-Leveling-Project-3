@@ -1,12 +1,11 @@
 <section class="grid grid-cols-1 gap-4 sm:grid-cols-3">
   <article class="rounded-xl border border-border bg-surface-raised p-5 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-xxl">
     <p class="text-sm text-ink-muted">Total Deposits</p>
-    <p class="mt-2 text-2xl font-semibold text-ink">$1,500.00</p>
-  </article>
+    <p class="mt-2 text-2xl font-semibold text-ink">{{ totalIn() | currency }}</p>  </article>
 
   <article class="rounded-xl border border-border bg-surface-raised p-5 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-xxl">
     <p class="text-sm text-ink-muted">Total Withdrawals</p>
-    <p class="mt-2 text-2xl font-semibold text-ink">$200.00</p>
+    <p class="mt-2 text-2xl font-semibold text-ink">{{ totalOut() | currency }}</p>
   </article>
 
   <article class="rounded-xl border border-border bg-surface-raised p-5 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-xxl">
