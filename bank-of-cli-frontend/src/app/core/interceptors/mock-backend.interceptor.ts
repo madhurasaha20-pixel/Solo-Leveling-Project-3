@@ -176,6 +176,7 @@ function moveMoney(
       accountId: tx.accountId,
       transactionType: tx.type.toUpperCase(),
       amount: tx.amount,
+      newBalance: account.balance,
       createdAt: tx.date,
     });
   }
@@ -193,6 +194,7 @@ function moveMoney(
       accountId: tx.accountId,
       transactionType: tx.type.toUpperCase(),
       amount: tx.amount,
+      newBalance: account.balance,
       createdAt: tx.date,
     });
   }
@@ -223,6 +225,7 @@ function moveMoney(
     accountId: out.accountId,
     transactionType: out.type.toUpperCase(),
     amount: out.amount,
+    newBalance: account.balance,
     createdAt: out.date,
   });
 }
