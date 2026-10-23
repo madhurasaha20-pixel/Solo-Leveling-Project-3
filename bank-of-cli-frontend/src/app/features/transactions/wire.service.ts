@@ -7,16 +7,14 @@ import { toApiError } from '../../core/services/api-error.util';
 
 export interface WireRequest {
   fromAccountId: string;
-  toAccountId: string;
+  toEmail: string;            // WIRE: was toAccountId
   amount: number;
 }
 
 export interface WireResponse {
-  transactionId: string;
-  fromAccountId: string;
-  toAccountId: string;
-  amount: number;
-  createdAt: string;
+  transactionId?: string;
+  amount?: number;
+  createdAt?: string;
 }
 
 @Injectable({ providedIn: 'root' })

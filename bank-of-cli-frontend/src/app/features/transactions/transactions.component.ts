@@ -1,3 +1,4 @@
+
 import { CommonModule } from '@angular/common';
 import {
     ChangeDetectionStrategy,
@@ -7,13 +8,14 @@ import {
     signal,
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { finalize } from 'rxjs';
+import { Observable, finalize } from 'rxjs';
 import { Account } from '../../core/models';
 import { AccountService } from '../../core/services/account.service';
 import { ToastComponent } from '../../shared/toast/toast.component';
 import { TransactionService } from './transaction.service';
+import { WireService } from './wire.service';
 
-type TransactionAction = 'deposit' | 'withdraw' | 'transfer';
+type TransactionAction = 'deposit' | 'withdraw' | 'transfer' | 'wire';
 
 @Component({
     selector: 'app-transactions',
@@ -26,6 +28,7 @@ export class TransactionsComponent {
     private readonly fb = inject(FormBuilder);
     private readonly transactionsService = inject(TransactionService);
     private readonly accountService = inject(AccountService);
+    private readonly wireService = inject(WireService);
 
     protected readonly accountList = signal<Account[]>([]);
     protected readonly currentAccount = signal(this.accountService.account);
@@ -34,6 +37,7 @@ export class TransactionsComponent {
         'deposit',
         'withdraw',
         'transfer',
+        'wire',
     ];
 
     protected readonly selectedType = signal<TransactionAction>('deposit');
@@ -50,6 +54,7 @@ export class TransactionsComponent {
         ],
         description: [''],
         toAccountId: [''],
+        toEmail: ['', [Validators.required, Validators.email]], // WIRE
     });
 
     protected readonly helpText = computed(() => {
@@ -60,6 +65,8 @@ export class TransactionsComponent {
                 return 'Move money out of your account without leaving any blank fields.';
             case 'transfer':
                 return 'Send money to another account using a valid destination account number.';
+            case 'wire':
+                return 'Send money to anyone using their email address.';
             default:
                 return '';
         }
@@ -94,6 +101,9 @@ export class TransactionsComponent {
     protected setTransactionType(type: TransactionAction): void {
         this.selectedType.set(type);
 
+        this.form.controls.toAccountId.setValue('');
+        this.form.controls.toEmail.setValue(''); // WIRE
+
         if (type === 'transfer') {
             this.form.controls.toAccountId.setValidators([
                 Validators.required,
@@ -103,7 +113,17 @@ export class TransactionsComponent {
             this.form.controls.toAccountId.clearValidators();
         }
 
+        if (type === 'wire') { // WIRE
+            this.form.controls.toEmail.setValidators([ // WIRE
+                Validators.required, // WIRE
+                Validators.email, // WIRE
+            ]); // WIRE
+        } else { // WIRE
+            this.form.controls.toEmail.clearValidators(); // WIRE
+        } // WIRE
+
         this.form.controls.toAccountId.updateValueAndValidity();
+        this.form.controls.toEmail.updateValueAndValidity(); // WIRE
     }
 
     protected onSourceAccountChange(accountId: string): void {
@@ -134,13 +154,28 @@ export class TransactionsComponent {
         this.submitted.set(true);
         this.form.markAllAsTouched();
 
-        if (this.selectedType() === 'transfer') {
-            this.form.controls.toAccountId.setValidators([
-                Validators.required,
-                Validators.minLength(3),
-            ]);
-            this.form.controls.toAccountId.updateValueAndValidity();
-        }
+        const action = this.selectedType(); // WIRE
+
+        if (action === 'transfer') { // WIRE
+            this.form.controls.toAccountId.setValidators([ // WIRE
+                Validators.required, // WIRE
+                Validators.minLength(3), // WIRE
+            ]); // WIRE
+        } else { // WIRE
+            this.form.controls.toAccountId.clearValidators(); // WIRE
+        } // WIRE
+
+        if (action === 'wire') { // WIRE
+            this.form.controls.toEmail.setValidators([ // WIRE
+                Validators.required, // WIRE
+                Validators.email, // WIRE
+            ]); // WIRE
+        } else { // WIRE
+            this.form.controls.toEmail.clearValidators(); // WIRE
+        } // WIRE
+
+        this.form.controls.toAccountId.updateValueAndValidity(); // WIRE
+        this.form.controls.toEmail.updateValueAndValidity(); // WIRE
 
         if (this.form.invalid) {
             return;
@@ -157,9 +192,9 @@ export class TransactionsComponent {
         const amount = Number(this.form.value.amount);
         const description = this.form.value.description?.trim() ?? '';
         const destinationAccountId = this.form.value.toAccountId ?? '';
-        const action = this.selectedType();
+        const recipientEmail = this.form.controls.toEmail.value?.trim() ?? ''; // WIRE
 
-        let call$;
+        let call$: Observable<unknown>;
 
         if (action === 'deposit') {
             call$ = this.transactionsService.deposit(accountId, {
@@ -171,12 +206,18 @@ export class TransactionsComponent {
                 amount,
                 description,
             });
-        } else {
+        } else if (action === 'transfer') {
             call$ = this.transactionsService.transfer(accountId, {
                 destinationAccountId,
                 amount,
                 description,
             });
+        } else { // WIRE
+            call$ = this.wireService.wire({ // WIRE
+                fromAccountId: accountId, // WIRE
+                toEmail: recipientEmail, // WIRE
+                amount, // WIRE
+            }); // WIRE
         }
 
         this.loading.set(true);
@@ -237,6 +278,7 @@ export class TransactionsComponent {
                         amount: null,
                         description: '',
                         toAccountId: '',
+                        toEmail: '', // WIRE
                     });
 
                     this.form.markAsPristine();
