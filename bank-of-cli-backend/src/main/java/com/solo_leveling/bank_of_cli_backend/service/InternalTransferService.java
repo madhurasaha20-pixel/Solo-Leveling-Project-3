@@ -4,6 +4,7 @@ import com.solo_leveling.bank_of_cli_backend.entity.Account;
 import com.solo_leveling.bank_of_cli_backend.entity.Transaction;
 import com.solo_leveling.bank_of_cli_backend.exception.AccountForbiddenException;
 import com.solo_leveling.bank_of_cli_backend.exception.AccountNotFoundException;
+import com.solo_leveling.bank_of_cli_backend.exception.InsufficientFundsException;
 import com.solo_leveling.bank_of_cli_backend.repository.AccountRepository;
 import com.solo_leveling.bank_of_cli_backend.repository.TransactionRepository;
 import jakarta.persistence.EntityManager;
@@ -66,7 +67,7 @@ public class InternalTransferService implements TransferProcessor {
         }
 
         if (source.getBalance().compareTo(amount) < 0) {
-            throw new IllegalArgumentException("Insufficient funds");
+            throw new InsufficientFundsException();
         }
 
         source.setBalance(source.getBalance().subtract(amount));
