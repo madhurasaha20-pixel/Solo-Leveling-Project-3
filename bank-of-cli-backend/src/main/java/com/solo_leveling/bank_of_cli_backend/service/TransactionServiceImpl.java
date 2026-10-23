@@ -9,15 +9,22 @@ import com.solo_leveling.bank_of_cli_backend.exception.AccountForbiddenException
 import com.solo_leveling.bank_of_cli_backend.exception.AccountNotFoundException;
 import com.solo_leveling.bank_of_cli_backend.repository.AccountRepository;
 import com.solo_leveling.bank_of_cli_backend.repository.TransactionRepository;
+import com.solo_leveling.bank_of_cli_backend.dto.response.TransactionHistoryResponse;
 import jakarta.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.PageRequest;
 
 import java.util.UUID;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class TransactionServiceImpl implements TransactionService {
+
+    private static final int MAX_HISTORY = 100;
 
     private final AccountRepository accounts;
     private final TransactionRepository transactions;
@@ -120,5 +127,31 @@ public class TransactionServiceImpl implements TransactionService {
                 request.destinationAccountId(),
                 request.amount()
         );
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<TransactionHistoryResponse> getHistory(String accountId, UUID ownerId, int limit) {
+        Account account = accounts.findById(accountId).orElseThrow(() -> new AccountNotFoundException(accountId));
+
+        if (!account.getUser().getId().equals(ownerId)) {
+            throw new AccountForbiddenException();
+        }
+
+        int size = Math.max(1, Math.min(limit, MAX_HISTORY));
+        List<Transaction> newestFirst = transactions.findByAccount_IdOrderByCreatedAtDescIdDesc(accountId, PageRequest.of(0, size));
+
+        BigDecimal running = account.getBalance();
+        List<TransactionHistoryResponse> history = new ArrayList<>();
+        for (Transaction transaction : newestFirst) {
+            TransactionHistoryResponse item = TransactionHistoryResponse.from(transaction, running);
+            history.add(item);
+
+            boolean credit = "deposit".equals(item.type()) || "transfer-in".equals(item.type());
+            running = credit
+                    ? running.subtract(transaction.getAmount())
+                    : running.add(transaction.getAmount());
+        }
+        return history;
     }
 }

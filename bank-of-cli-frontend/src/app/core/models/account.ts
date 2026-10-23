@@ -18,3 +18,9 @@ export interface UpdateAccountRequest {
   nickname?: string;
   type?: 'checking' | 'savings';
 }
+
+/** POST /accounts. */
+export interface CreateAccountRequest {
+  type: 'checking' | 'savings';
+  nickname?: string;
+}

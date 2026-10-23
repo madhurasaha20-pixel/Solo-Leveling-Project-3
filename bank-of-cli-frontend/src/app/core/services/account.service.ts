@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject, Observable, catchError, tap, throwError } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
-import { Account, UpdateAccountRequest } from '../models';
+import { Account, CreateAccountRequest, UpdateAccountRequest } from '../models';
 import { toApiError } from './api-error.util';
 import { AuthService } from './auth.service';
 
@@ -55,6 +55,17 @@ export class AccountService {
     return this.http.get<Account[]>(`${this.api}/accounts`).pipe(
       tap(accounts => this.accountsSubject.next(accounts)),
       catchError(err => throwError(() => toApiError(err)))
+    );
+  }
+
+  /** POST /accounts. Creates an account for the logged-in user. */
+  createAccount(request: CreateAccountRequest): Observable<Account> {
+    return this.http.post<Account>(`${this.api}/accounts`, request).pipe(
+        tap(account => {
+          this.accountsSubject.next([...this.accountsSubject.value, account]);
+          this.accountSubject.next(account);
+        }),
+        catchError(err => throwError(() => toApiError(err)))
     );
   }
 

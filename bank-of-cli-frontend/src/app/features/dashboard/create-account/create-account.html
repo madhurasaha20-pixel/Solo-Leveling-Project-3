@@ -1,0 +1,42 @@
+<bc-card title="Create an account">
+    <form [formGroup]="form" (ngSubmit)="submit()" class="space-y-5">
+        <div>
+            <label for="account-type" class="mb-1 block text-sm font-medium text-ink">
+                Account type
+            </label>
+            <select
+                    id="account-type"
+                    formControlName="type"
+                    class="w-full rounded-lg border border-border-strong bg-surface px-3 py-2 text-ink"
+            >
+                <option value="checking">Checking</option>
+                <option value="savings">Savings</option>
+            </select>
+        </div>
+
+        <div>
+            <label for="account-nickname" class="mb-1 block text-sm font-medium text-ink">
+                Nickname (optional)
+            </label>
+            <input
+                    id="account-nickname"
+                    type="text"
+                    formControlName="nickname"
+                    maxlength="30"
+                    placeholder="e.g. Rainy day fund"
+                    class="w-full rounded-lg border border-border-strong bg-surface px-3 py-2 text-ink"
+            />
+            @if (form.controls.nickname.touched && form.controls.nickname.invalid) {
+            <p class="mt-1 text-sm text-danger">Nickname must be 30 characters or fewer.</p>
+            }
+        </div>
+
+        @if (error(); as message) {
+        <p role="alert" class="text-sm text-danger">{{ message }}</p>
+        }
+
+        <bc-button type="submit" [disabled]="saving() || form.invalid">
+            {{ saving() ? 'Creating...' : 'Create account' }}
+        </bc-button>
+    </form>
+</bc-card>

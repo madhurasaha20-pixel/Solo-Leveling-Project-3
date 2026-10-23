@@ -20,20 +20,15 @@ export class TransactionHistoryComponent {
     private readonly accounts = inject(AccountService);
     private readonly transactionService = inject(TransactionService);
 
-    protected readonly transactions = toSignal(this.transactionService.recent$, {
-        initialValue: [] as Transaction[],
-    });
+    protected readonly transactions = toSignal(this.transactionService.recent$, {initialValue: [] as Transaction[],});
     protected readonly loading = signal(true);
     protected readonly error = signal<string | null>(null);
 
-    protected readonly totalIn = computed(
-        () => this.transactions().filter(isCredit).reduce((sum, t) => sum + t.amount, 0)
-    );
-    protected readonly totalOut = computed(
-        this.transactions().filter(t => !isCredit(t)).reduce((sum, t) => sum + t.amount, 0)
-    );
+    protected readonly totalIn = computed(() => this.transactions().filter(isCredit).reduce((sum, t) => sum + t.amount, 0));
+    protected readonly totalOut = computed(() => this.transactions().filter(t => !isCredit(t)).reduce((sum, t) => sum + t.amount, 0));
 
     constructor() {
+        // Opening /transactions directly means the account isn't loaded yet
         if (!this.accounts.account) {
             this.accounts.loadMyAccount().pipe(takeUntilDestroyed()).subscribe({
                 error: (e: ApiError) => {
@@ -66,8 +61,11 @@ export class TransactionHistoryComponent {
 
     protected label(t: Transaction): string {
         if (t.description) return t.description;
-        if (t.type === 'transfer-out') return `Transfer to ${t.counterpartyAccountId}`;
-        if (t.type === 'transfer-in') return `Transfer from ${t.counterpartyAccountId}`;
-        return t.type === 'deposit' ? 'Deposit' : 'Withdrawal';
+        switch (t.type) {
+            case 'deposit': return 'Deposit';
+            case 'withdraw': return 'Withdrawal';
+            case 'transfer-in': return 'Transfer in';
+            case 'transfer-out': return 'Transfer out';
+        }
     }
 }

@@ -8,6 +8,7 @@ import { ToastComponent } from '../../shared/toast/toast.component';
 import { PageShellComponent } from '../page-shell.component';
 import { BalanceCardComponent } from './balance-card.component';
 import { EditAccountCardComponent } from './edit-account-card.component';
+import { CreateAccountComponent } from './create-account/create-account';
 
 /**
  * Dashboard page. Pages call services; the cards below only receive data.
@@ -16,7 +17,13 @@ import { EditAccountCardComponent } from './edit-account-card.component';
  */
 @Component({
   selector: 'app-dashboard',
-  imports: [PageShellComponent, BalanceCardComponent, EditAccountCardComponent, ToastComponent],
+  imports: [
+    PageShellComponent,
+    BalanceCardComponent,
+    EditAccountCardComponent,
+    CreateAccountComponent,
+    ToastComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <app-page-shell />
@@ -45,7 +52,14 @@ import { EditAccountCardComponent } from './edit-account-card.component';
   />
   }
       
-      <!-- Transaction history card goes here: <app-... class="lg:col-span-2" /> -->
+      @if (accountList().length < 2) {
+          <app-create-account
+            class="lg:col-span-1"
+            (created)="refresh()"
+          />
+        }
+
+        <!-- Transaction history card goes here: <app-... class="lg:col-span-2" /> -->
     </div>
     <app-toast [message]="toastMessage()" [type]="toastType()" />
   `,

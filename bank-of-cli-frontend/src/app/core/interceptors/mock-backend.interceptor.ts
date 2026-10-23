@@ -35,9 +35,11 @@ export const mockBackendInterceptor: HttpInterceptorFn = (req, next) => {
     return next(req);
   }
   const path = req.url.slice(environment.apiBase.length).split('?')[0];
-  // auth, user and the account lookups are served by the real backend; the rest is still mocked
-  const isLiveAccountRoute = req.method === 'GET' && (path === '/accounts' || path === '/accounts/me');
-  if (path.startsWith('/auth/') || path.startsWith('/users/') || isLiveAccountRoute) {
+  // auth, user, account lookups and transaction history are served by the real backend; the rest is still mocked
+  const isLiveRoute =
+    req.method === 'GET' &&
+    (path === '/accounts' || path === '/accounts/me' || /^\/accounts\/[^/]+\/transactions$/.test(path));
+  if (path.startsWith('/auth/') || path.startsWith('/users/') || isLiveRoute) {
     return next(req);
   }
   const db = inject(MockDb);
@@ -169,7 +171,13 @@ function moveMoney(
     account.balance = money(account.balance + value);
     const tx = record(db, account, 'deposit', value, description ?? 'Deposit');
     db.save();
-    return ok<TransactionResponse>({ transaction: { ...tx }, account: { ...account } });
+    return ok<TransactionResponse>({
+      id: tx.id,
+      accountId: tx.accountId,
+      transactionType: tx.type.toUpperCase(),
+      amount: tx.amount,
+      createdAt: tx.date,
+    });
   }
 
   // ---- withdraw ----
@@ -180,7 +188,13 @@ function moveMoney(
     account.balance = money(account.balance - value);
     const tx = record(db, account, 'withdraw', value, description ?? 'Withdrawal');
     db.save();
-    return ok<TransactionResponse>({ transaction: { ...tx }, account: { ...account } });
+    return ok<TransactionResponse>({
+      id: tx.id,
+      accountId: tx.accountId,
+      transactionType: tx.type.toUpperCase(),
+      amount: tx.amount,
+      createdAt: tx.date,
+    });
   }
 
   // ---- transfer ----
@@ -204,7 +218,13 @@ function moveMoney(
   const out = record(db, account, 'transfer-out', value, description ?? `Transfer to ${target.id}`, target.id);
   record(db, target, 'transfer-in', value, description ?? `Transfer from ${account.id}`, account.id);
   db.save();
-  return ok<TransactionResponse>({ transaction: { ...out }, account: { ...account } });
+  return ok<TransactionResponse>({
+    id: out.id,
+    accountId: out.accountId,
+    transactionType: out.type.toUpperCase(),
+    amount: out.amount,
+    createdAt: out.date,
+  });
 }
 
 // ---------------------------------------------------------------------------
