@@ -1,3 +1,4 @@
+
 <section class="mx-auto max-w-4xl">
     <div class="mb-8">
         <p class="text-label font-medium uppercase tracking-[0.12em] text-ink-muted">Transaction center</p>
@@ -6,7 +7,7 @@
             your request with built-in validation.</p>
     </div>
 
-    <div class="mb-8 grid gap-3 md:grid-cols-3">
+    <div class="mb-8 grid gap-3 md:grid-cols-4">
         @for (type of transactionTypes; track type) {
         <button type="button" (click)="setTransactionType(type)"
             class="rounded-md border px-4 py-3 text-left text-body font-medium transition-colors duration-[120ms] ease-out hover:bg-brand-tint"
@@ -25,52 +26,25 @@
             <p class="mt-1 text-body-sm text-ink-muted">{{ helpText() }}</p>
         </div>
 
-
-
-<!--
         <div class="mb-5">
-            <label class="mb-2 block text-label font-medium text-ink" for="fromAccountId">
-                Source account
-            </label>
-            
-            
-            <select id="fromAccountId" formControlName="fromAccountId"
-                (change)="onSourceAccountChange($any($event.target).value)"
-                class="w-full rounded-md border border-border bg-surface px-3 py-2.5 text-body text-ink">
-                @for (account of accountList(); track account.id) {
-                <option [value]="account.id">
-                    {{ account.type | titlecase }} — {{ account.id }}
-                </option>
-                }
-            </select>
-        </div>  -->
-<div class="mb-5">
-<div class="relative">
-  <select
-    id="fromAccountId"
-    formControlName="fromAccountId"
-    (change)="onSourceAccountChange($any($event.target).value)"
-    class="w-full appearance-none rounded-md border border-border bg-surface px-3 py-2.5 pr-10 text-body text-ink"
-  >
-    @for (account of accountList(); track account.id) {
-      <option [value]="account.id">
-        {{ account.type | titlecase }} — {{ account.id }}
-      </option>
-    }
-  </select>
+            <div class="relative">
+                <select
+                    id="fromAccountId"
+                    formControlName="fromAccountId"
+                    (change)="onSourceAccountChange($any($event.target).value)"
+                    class="w-full appearance-none rounded-md border border-border bg-surface px-3 py-2.5 pr-10 text-body text-ink">
+                    @for (account of accountList(); track account.id) {
+                    <option [value]="account.id">
+                        {{ account.type | titlecase }} — {{ account.id }}
+                    </option>
+                    }
+                </select>
 
-  
-  <span
-    aria-hidden="true"
-    class="pointer-events-none absolute right-4 top-1/2 size-2 -translate-y-1/2 rotate-45 border-b-2 border-r-2 border-current"
-  ></span>
-</div>
-</div>
-
-
-
-
-
+                <span
+                    aria-hidden="true"
+                    class="pointer-events-none absolute right-4 top-1/2 size-2 -translate-y-1/2 rotate-45 border-b-2 border-r-2 border-current"></span>
+            </div>
+        </div>
 
         @if (selectedType() === 'transfer') {
         <div class="mb-5">
@@ -78,47 +52,25 @@
                 Destination account
             </label>
 
-            <!--
-            <select id="toAccountId" formControlName="toAccountId"
-                class="w-full rounded-md border border-border bg-surface px-3 py-2.5 text-body text-ink">
-                <option value="">Select destination account</option>
-
-                @for (account of accountList(); track account.id) {
-                @if (account.id !== form.controls.fromAccountId.value) {
-                <option [value]="account.id">
-                    {{ account.type | titlecase }} — {{ account.id }}
-                </option>
-                }
-                }
-            </select> -->
-
-
             <div class="relative">
-              <select
-                id="toAccountId"
-                formControlName="toAccountId"
-                class="w-full appearance-none rounded-md border border-border bg-surface px-3 py-2.5 pr-10 text-body text-ink"
-              >
-                <!-- <option value="">Select destination account</option> -->
-            
-                @for (account of accountList(); track account.id) {
-                  @if (account.id !== form.controls.fromAccountId.value) {
+                <select
+                    id="toAccountId"
+                    formControlName="toAccountId"
+                    class="w-full appearance-none rounded-md border border-border bg-surface px-3 py-2.5 pr-10 text-body text-ink">
+                    @for (account of accountList(); track account.id) {
+                    @if (account.id !== form.controls.fromAccountId.value) {
                     <option [value]="account.id">
-                      {{ account.type | titlecase }} — {{ account.id }}
+                        {{ account.type | titlecase }} — {{ account.id }}
                     </option>
-                  }
-                }
-              </select>
-          
-              <span
-                aria-hidden="true"
-                class="pointer-events-none absolute right-4 top-1/2 size-2 -translate-y-1/2 rotate-45 border-b-2 border-r-2 border-current"
-              ></span>
+                    }
+                    }
+                </select>
+
+                <span
+                    aria-hidden="true"
+                    class="pointer-events-none absolute right-4 top-1/2 size-2 -translate-y-1/2 rotate-45 border-b-2 border-r-2 border-current"></span>
             </div>
 
-
-
-            
             @if (isFieldInvalid('toAccountId')) {
             <p class="mt-2 text-body-sm text-debit">
                 Please select a destination account.
@@ -127,6 +79,38 @@
         </div>
         }
 
+        @if (selectedType() === 'wire') {
+        <div class="mb-5">
+            <label class="mb-2 block text-label font-medium text-ink" for="wireEmail">
+                Recipient email
+            </label>
+
+            <input
+                id="wireEmail"
+                type="email"
+                formControlName="toEmail"
+                placeholder="name@example.com"
+                autocomplete="email"
+                class="w-full rounded-md border bg-surface px-3 py-2.5 text-body text-ink placeholder:text-ink-muted"
+                [class.border-debit]="
+                    form.controls.toEmail.invalid &&
+                    (form.controls.toEmail.touched || submitted())
+                "
+                [class.border-border]="
+                    !form.controls.toEmail.invalid ||
+                    (!form.controls.toEmail.touched && !submitted())
+                " />
+
+            @if (
+                form.controls.toEmail.invalid &&
+                (form.controls.toEmail.touched || submitted())
+            ) {
+            <p class="mt-2 text-body-sm text-debit">
+                Enter a valid recipient email address.
+            </p>
+            }
+        </div>
+        }
 
         <div class="mb-5">
             <label class="mb-2 block text-label font-medium text-ink" for="amount">Amount</label>
@@ -154,7 +138,7 @@
             {{ selectedType() | titlecase }} money
             }
         </button>
-
     </form>
 </section>
+
 <app-toast [message]="toastMessage()" [type]="toastType()" />
