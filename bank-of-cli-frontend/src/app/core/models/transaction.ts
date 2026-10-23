@@ -35,7 +35,7 @@ export interface WithdrawRequest {
 }
 
 export interface TransferRequest {
-  toAccountId: string;
+  destinationAccountId: string;
   amount: number;
   description?: string;
 }
@@ -43,8 +43,11 @@ export interface TransferRequest {
 // ---- Response body for deposit / withdraw / transfer ----
 
 export interface TransactionResponse {
-  transaction: Transaction; // the record created on YOUR account
-  account: Account;         // your account with the updated balance
+  id: string;
+  accountId: string;
+  transactionType: string;
+  amount: number;
+  createdAt: string;
 }
 
 /** True when a transaction adds money to the account. Handy for +/- and colors in the UI. */
