@@ -23,27 +23,46 @@ import { EditAccountCardComponent } from './edit-account-card.component';
     <div class="mt-8 grid gap-6 lg:grid-cols-3">
 
     
-  @if (editing(account()); as acct) {
-    <app-edit-account-card [account]="acct" [saving]="saving()" [error]="editError()"
-                           (save)="saveEdit(acct.id, $event)" (cancel)="cancelEdit()" />
+  @if (account(); as acct) {
+  @if (editing(acct); as editingAcct) {
+    <app-edit-account-card
+      [account]="editingAcct"
+      [saving]="saving()"
+      [error]="editError()"
+      (save)="saveEdit(editingAcct.id, $event)"
+      (cancel)="cancelEdit()"
+    />
   } @else {
-    <app-balance-card [account]="account()" [updatedAt]="updatedAt()" [error]="error()" (retry)="refresh()"
-                      (edit)="startEdit($event)" />
+    <app-balance-card
+      [account]="acct"
+      [updatedAt]="updatedAt()"
+      [error]="error()"
+      (retry)="refresh()"
+      (edit)="startEdit($event)"
+    />
   }
+}
 
-  @if (editing(savingsAccount()); as acct) {
-    <app-edit-account-card [account]="acct" [saving]="saving()" [error]="editError()"
-                           (save)="saveEdit(acct.id, $event)" (cancel)="cancelEdit()" />
+  @if (savingsAccount(); as acct) {
+  @if (editing(acct); as editingAcct) {
+    <app-edit-account-card
+      [account]="editingAcct"
+      [saving]="saving()"
+      [error]="editError()"
+      (save)="saveEdit(editingAcct.id, $event)"
+      (cancel)="cancelEdit()"
+    />
   } @else {
-  <app-balance-card
-  title="Savings"
-  [account]="savingsAccount()"
-  [updatedAt]="updatedAt()"
-  [error]="error()"
-  (retry)="refresh()"
-  (edit)="startEdit($event)"
-  />
+    <app-balance-card
+      title="Savings"
+      [account]="acct"
+      [updatedAt]="updatedAt()"
+      [error]="error()"
+      (retry)="refresh()"
+      (edit)="startEdit($event)"
+    />
   }
+}
       
       <!-- Transaction history card goes here: <app-... class="lg:col-span-2" /> -->
     </div>
