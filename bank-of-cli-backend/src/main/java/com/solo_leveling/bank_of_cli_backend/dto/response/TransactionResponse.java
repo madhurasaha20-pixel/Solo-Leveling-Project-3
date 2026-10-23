@@ -11,6 +11,7 @@ public record TransactionResponse(
         String accountId,
         String transactionType,
         BigDecimal amount,
+        BigDecimal newBalance,
         Instant createdAt
 ) {
     public static TransactionResponse from(Transaction transaction) {
@@ -19,6 +20,7 @@ public record TransactionResponse(
                 transaction.getAccount().getId(),
                 transaction.getTransactionType(),
                 transaction.getAmount(),
+                transaction.getAccount().getBalance(),
                 transaction.getCreatedAt()
         );
     }

@@ -52,6 +52,16 @@ public class GlobalExceptionHandler {
         return build(HttpStatus.CONFLICT, "BALANCE_NOT_ZERO", e.getMessage(), null);
     }
 
+    @ExceptionHandler(InsufficientFundsException.class)
+    ResponseEntity<ApiError> handleInsufficientFunds(InsufficientFundsException e) {
+        return build(
+                HttpStatus.UNPROCESSABLE_ENTITY,
+                "INSUFFICIENT_FUNDS",
+                e.getMessage(),
+                null
+        );
+    }
+
     @ExceptionHandler(NoResourceFoundException.class)
     ResponseEntity<ApiError> handleNotFound(NoResourceFoundException e) {
         return build(HttpStatus.NOT_FOUND, "NOT_FOUND", "Resource not found.", null);

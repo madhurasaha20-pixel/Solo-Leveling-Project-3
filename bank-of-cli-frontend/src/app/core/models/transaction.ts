@@ -47,6 +47,7 @@ export interface TransactionResponse {
   accountId: string;
   transactionType: string;
   amount: number;
+  newBalance: number;
   createdAt: string;
 }
 

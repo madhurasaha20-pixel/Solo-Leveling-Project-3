@@ -14,6 +14,7 @@ import { AccountService } from '../../core/services/account.service';
 import { ToastComponent } from '../../shared/toast/toast.component';
 import { TransactionService } from './transaction.service';
 import { WireService } from './wire.service';
+import { TransactionResponse } from '../../core/models/transaction';
 
 type TransactionAction = 'deposit' | 'withdraw' | 'transfer' | 'wire';
 
@@ -194,7 +195,7 @@ export class TransactionsComponent {
         const destinationAccountId = this.form.value.toAccountId ?? '';
         const recipientEmail = this.form.controls.toEmail.value?.trim() ?? ''; // WIRE
 
-        let call$: Observable<unknown>;
+        let call$: Observable<TransactionResponse>;
 
         if (action === 'deposit') {
             call$ = this.transactionsService.deposit(accountId, {
@@ -220,6 +221,8 @@ export class TransactionsComponent {
             }); // WIRE
         }
 
+        let transactionResponse: TransactionResponse | null = null;
+
         this.loading.set(true);
         const startedAt = Date.now();
         let succeeded = false;
@@ -233,9 +236,21 @@ export class TransactionsComponent {
                     setTimeout(() => {
                         this.loading.set(false);
 
-                        if (succeeded) {
+                        if (succeeded && transactionResponse) {
+                            const operation =
+                                action === 'withdraw'
+                                    ? 'Withdrawal'
+                                    : action === 'transfer'
+                                        ? 'Transfer'
+                                        : 'Deposit';
+
+                            const balance = new Intl.NumberFormat('en-US', {
+                                style: 'currency',
+                                currency: 'USD',
+                            }).format(transactionResponse.newBalance);
+
                             this.toastMessage.set(
-                                `${action.charAt(0).toUpperCase() + action.slice(1)} of $${amount.toFixed(2)} submitted successfully.`,
+                                `${operation} succeeded. New balance: ${balance}`,
                             );
                             this.toastType.set('success');
                         }
@@ -243,8 +258,9 @@ export class TransactionsComponent {
                 }),
             )
             .subscribe({
-                next: () => {
+                next: (response) => {
                     succeeded = true;
+                    transactionResponse = response;
 
                     this.accountService.loadMyAccounts().subscribe({
                         next: (accounts) => {
